@@ -1,9 +1,8 @@
 # Dependencies
 node_modules/
 
-# SCSS source files (ignore, but keep compiled CSS)
-*.scss
-assets/scss/
+# Compiled CSS files (build artifacts)
+assets/css/
 
 # IDE
 .idea/
