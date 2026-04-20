@@ -1,0 +1,11 @@
+{
+  "name": "knvas",
+  "version": "1.0.0",
+  "description": "Interactive grid canvas",
+  "scripts": {
+    "build": "sass assets/scss:assets/css --style=compressed"
+  },
+  "devDependencies": {
+    "sass": "^1.77.0"
+  }
+}

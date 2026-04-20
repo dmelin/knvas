@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# SCSS source files (ignore, but keep compiled CSS)
+*.scss
+assets/scss/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
