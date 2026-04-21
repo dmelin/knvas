@@ -47,7 +47,7 @@ class KnvasManager {
         document.querySelectorAll('knvas').forEach(el => this.initializeElement(el));
     }
 
-    initializeElement(element) {
+    async initializeElement(element) {
         const type = element.getAttribute('type');
         if (!type) return;
 
@@ -58,7 +58,19 @@ class KnvasManager {
             container.querySelectorAll('.knvas-error').forEach(err => err.remove());
         }
 
-        const ComponentClass = this.components[type];
+        let ComponentClass = this.components[type];
+
+        // If component not registered, try to load it dynamically
+        if (!ComponentClass) {
+            try {
+                await this.loadComponent(type);
+                ComponentClass = this.components[type];
+            } catch (error) {
+                this.renderError(container, `Failed to load component "${type}": ${error.message}`);
+                return;
+            }
+        }
+
         if (!ComponentClass) {
             this.renderError(container, `Knvas component type "${type}" not registered`);
             return;
@@ -73,6 +85,45 @@ class KnvasManager {
         } catch (error) {
             this.renderError(container, error.message);
         }
+    }
+
+    loadComponent(type) {
+        // If already loading this component, return the existing promise
+        if (this.loadingComponents && this.loadingComponents[type]) {
+            return this.loadingComponents[type];
+        }
+
+        if (!this.loadingComponents) {
+            this.loadingComponents = {};
+        }
+
+        // Determine the base URL (where knvas.js is located)
+        const scripts = document.querySelectorAll('script[src*="knvas.js"]');
+        let baseUrl = '';
+        if (scripts.length > 0) {
+            const scriptSrc = scripts[0].src;
+            baseUrl = scriptSrc.substring(0, scriptSrc.lastIndexOf('/') + 1);
+        }
+
+        const componentUrl = `${baseUrl}${type}.js`;
+
+        // Create a promise that resolves when the script loads
+        const promise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = componentUrl;
+            script.onload = () => {
+                delete this.loadingComponents[type];
+                resolve();
+            };
+            script.onerror = () => {
+                delete this.loadingComponents[type];
+                reject(new Error(`Could not load ${componentUrl}`));
+            };
+            document.head.appendChild(script);
+        });
+
+        this.loadingComponents[type] = promise;
+        return promise;
     }
 
     renderError(container, message) {

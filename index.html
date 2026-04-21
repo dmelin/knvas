@@ -37,6 +37,18 @@
                 <span class="material-symbols-outlined">blur_on</span>
                 <span class="menu-text">Smoke</span>
             </a>
+            <a href="#" class="menu-item" data-canvas-type="blobs">
+                <span class="material-symbols-outlined">bubble_chart</span>
+                <span class="menu-text">Blobs</span>
+            </a>
+            <a href="#" class="menu-item" data-canvas-type="lines">
+                <span class="material-symbols-outlined">view_column</span>
+                <span class="menu-text">Lines</span>
+            </a>
+            <a href="#" class="menu-item" data-canvas-type="ping">
+                <span class="material-symbols-outlined">radio_button_unchecked</span>
+                <span class="menu-text">Ping</span>
+            </a>
         </div>
         <div class="sidebar-section">
             <h2 class="section-title">Info</h2>
@@ -381,6 +393,152 @@
                     tailSpeed: '0.5',
                     repelStrength: '0.4'
                 }
+            },
+            blobs: {
+                'Knvas': {
+                    backgroundColor: '#1a2332',
+                    foregroundColor: '#00d4ff',
+                    blobCount: '30',
+                    blobCountMobile: '20',
+                    maxRadius: '80',
+                    influenceRadius: '300',
+                    tailSpeed: '1'
+                },
+                'Ocean': {
+                    backgroundColor: '#001f3f',
+                    foregroundColor: '#39cccc',
+                    blobCount: '25',
+                    blobCountMobile: '15',
+                    maxRadius: '90',
+                    influenceRadius: '350',
+                    tailSpeed: '0.6'
+                },
+                'Lava': {
+                    backgroundColor: '#1a0000',
+                    foregroundColor: '#ff4136',
+                    blobCount: '40',
+                    blobCountMobile: '25',
+                    maxRadius: '70',
+                    influenceRadius: '280',
+                    tailSpeed: '0.4'
+                },
+                'Neon': {
+                    backgroundColor: '#0d0221',
+                    foregroundColor: '#ff006e',
+                    blobCount: '35',
+                    blobCountMobile: '22',
+                    maxRadius: '75',
+                    influenceRadius: '250',
+                    tailSpeed: '1'
+                },
+                'Pastel': {
+                    backgroundColor: '#fef6e4',
+                    foregroundColor: '#f582ae',
+                    blobCount: '20',
+                    blobCountMobile: '12',
+                    maxRadius: '100',
+                    influenceRadius: '400',
+                    tailSpeed: '0.8'
+                }
+            },
+            lines: {
+                'Knvas': {
+                    backgroundColor: '#1a2332',
+                    middlegroundColor: '#00d4ff',
+                    foregroundColor: '#d946ef',
+                    lineCount: '50',
+                    lineCountMobile: '30',
+                    mouseRepel: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '1',
+                    repelStrength: '0.5'
+                },
+                'Matrix': {
+                    backgroundColor: '#000000',
+                    middlegroundColor: '#00ff00',
+                    foregroundColor: '#00ff00',
+                    lineCount: '60',
+                    lineCountMobile: '35',
+                    mouseRepel: 'true',
+                    glowAtMouse: 'false',
+                    tailSpeed: '0.8',
+                    repelStrength: '0.6'
+                },
+                'Sunset': {
+                    backgroundColor: '#1a0a00',
+                    middlegroundColor: '#ff6b35',
+                    foregroundColor: '#ffd700',
+                    lineCount: '40',
+                    lineCountMobile: '25',
+                    mouseRepel: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0.5',
+                    repelStrength: '0.4'
+                },
+                'Ocean Wave': {
+                    backgroundColor: '#001f3f',
+                    middlegroundColor: '#39cccc',
+                    foregroundColor: '#ffffff',
+                    lineCount: '55',
+                    lineCountMobile: '32',
+                    mouseRepel: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0.7',
+                    repelStrength: '0.5'
+                },
+                'Neon City': {
+                    backgroundColor: '#0d0221',
+                    middlegroundColor: '#ff006e',
+                    foregroundColor: '#00fff5',
+                    lineCount: '70',
+                    lineCountMobile: '40',
+                    mouseRepel: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '1',
+                    repelStrength: '0.7'
+                }
+            },
+            ping: {
+                'Knvas': {
+                    backgroundColor: '#1a2332',
+                    middlegroundColor: '#00d4ff',
+                    foregroundColor: '#d946ef',
+                    pingFrequency: '0.5',
+                    growSpeed: '1',
+                    tailSpeed: '1'
+                },
+                'Sonar': {
+                    backgroundColor: '#000a1a',
+                    middlegroundColor: '#00ff88',
+                    foregroundColor: '#00ff88',
+                    pingFrequency: '0.7',
+                    growSpeed: '0.8',
+                    tailSpeed: '0.5'
+                },
+                'Radar': {
+                    backgroundColor: '#0a0a0a',
+                    middlegroundColor: '#00ff00',
+                    foregroundColor: '#ffff00',
+                    pingFrequency: '0.4',
+                    growSpeed: '1.2',
+                    tailSpeed: '0.8'
+                },
+                'Ripple': {
+                    backgroundColor: '#001f3f',
+                    middlegroundColor: '#7fdbff',
+                    foregroundColor: '#ffffff',
+                    pingFrequency: '0.8',
+                    growSpeed: '0.6',
+                    tailSpeed: '0.4'
+                },
+                'Pulse': {
+                    backgroundColor: '#1a0000',
+                    middlegroundColor: '#ff006e',
+                    foregroundColor: '#ffdc00',
+                    pingFrequency: '0.3',
+                    growSpeed: '1.5',
+                    tailSpeed: '1'
+                }
             }
         };
 
@@ -658,6 +816,138 @@
                 repelStrength.setAttribute('name', 'repelStrength');
                 repelStrength.setAttribute('value', '0.5');
                 knvasElement.appendChild(repelStrength);
+            } else if (type === 'blobs') {
+                // Set background color
+                const bg = document.createElement('option');
+                bg.setAttribute('name', 'backgroundColor');
+                bg.setAttribute('value', '#1a2332');
+                knvasElement.appendChild(bg);
+
+                // Set blob color (foreground)
+                const fg = document.createElement('option');
+                fg.setAttribute('name', 'foregroundColor');
+                fg.setAttribute('value', '#00d4ff');
+                knvasElement.appendChild(fg);
+
+                // Set blob count
+                const blobCount = document.createElement('option');
+                blobCount.setAttribute('name', 'blobCount');
+                blobCount.setAttribute('value', '30');
+                knvasElement.appendChild(blobCount);
+
+                // Set blob count mobile
+                const blobCountMobile = document.createElement('option');
+                blobCountMobile.setAttribute('name', 'blobCountMobile');
+                blobCountMobile.setAttribute('value', '20');
+                knvasElement.appendChild(blobCountMobile);
+
+                // Set max radius
+                const maxRadius = document.createElement('option');
+                maxRadius.setAttribute('name', 'maxRadius');
+                maxRadius.setAttribute('value', '80');
+                knvasElement.appendChild(maxRadius);
+
+                // Set influence radius
+                const influenceRadius = document.createElement('option');
+                influenceRadius.setAttribute('name', 'influenceRadius');
+                influenceRadius.setAttribute('value', '300');
+                knvasElement.appendChild(influenceRadius);
+
+                // Set tail speed
+                const tail = document.createElement('option');
+                tail.setAttribute('name', 'tailSpeed');
+                tail.setAttribute('value', '1');
+                knvasElement.appendChild(tail);
+            } else if (type === 'lines') {
+                // Set background color
+                const bg = document.createElement('option');
+                bg.setAttribute('name', 'backgroundColor');
+                bg.setAttribute('value', '#1a2332');
+                knvasElement.appendChild(bg);
+
+                // Set line color (middleground)
+                const mg = document.createElement('option');
+                mg.setAttribute('name', 'middlegroundColor');
+                mg.setAttribute('value', '#00d4ff');
+                knvasElement.appendChild(mg);
+
+                // Set glow color (foreground)
+                const fg = document.createElement('option');
+                fg.setAttribute('name', 'foregroundColor');
+                fg.setAttribute('value', '#d946ef');
+                knvasElement.appendChild(fg);
+
+                // Set line count
+                const lineCount = document.createElement('option');
+                lineCount.setAttribute('name', 'lineCount');
+                lineCount.setAttribute('value', '50');
+                knvasElement.appendChild(lineCount);
+
+                // Set line count mobile
+                const lineCountMobile = document.createElement('option');
+                lineCountMobile.setAttribute('name', 'lineCountMobile');
+                lineCountMobile.setAttribute('value', '30');
+                knvasElement.appendChild(lineCountMobile);
+
+                // Enable mouse repel
+                const repel = document.createElement('option');
+                repel.setAttribute('name', 'mouseRepel');
+                repel.setAttribute('value', 'true');
+                knvasElement.appendChild(repel);
+
+                // Enable glow at mouse
+                const glow = document.createElement('option');
+                glow.setAttribute('name', 'glowAtMouse');
+                glow.setAttribute('value', 'true');
+                knvasElement.appendChild(glow);
+
+                // Set tail speed
+                const tail = document.createElement('option');
+                tail.setAttribute('name', 'tailSpeed');
+                tail.setAttribute('value', '1');
+                knvasElement.appendChild(tail);
+
+                // Set repel strength
+                const repelStrength = document.createElement('option');
+                repelStrength.setAttribute('name', 'repelStrength');
+                repelStrength.setAttribute('value', '0.5');
+                knvasElement.appendChild(repelStrength);
+            } else if (type === 'ping') {
+                // Set background color
+                const bg = document.createElement('option');
+                bg.setAttribute('name', 'backgroundColor');
+                bg.setAttribute('value', '#1a2332');
+                knvasElement.appendChild(bg);
+
+                // Set ping color (middleground)
+                const mg = document.createElement('option');
+                mg.setAttribute('name', 'middlegroundColor');
+                mg.setAttribute('value', '#00d4ff');
+                knvasElement.appendChild(mg);
+
+                // Set accent color (foreground)
+                const fg = document.createElement('option');
+                fg.setAttribute('name', 'foregroundColor');
+                fg.setAttribute('value', '#d946ef');
+                knvasElement.appendChild(fg);
+
+                // Set ping frequency
+                const freq = document.createElement('option');
+                freq.setAttribute('name', 'pingFrequency');
+                freq.setAttribute('value', '0.5');
+                knvasElement.appendChild(freq);
+
+                // Set grow speed
+                const speed = document.createElement('option');
+                speed.setAttribute('name', 'growSpeed');
+                speed.setAttribute('value', '1');
+                knvasElement.appendChild(speed);
+
+                // Set tail speed
+                const tail = document.createElement('option');
+                tail.setAttribute('name', 'tailSpeed');
+                tail.setAttribute('value', '1');
+                knvasElement.appendChild(tail);
             }
 
             container.appendChild(knvasElement);
@@ -743,6 +1033,34 @@
                 { name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse' },
                 { name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1 },
                 { name: 'repelStrength', type: 'range', label: 'Repel Strength', min: 0, max: 1, step: 0.05 }
+            ],
+            blobs: [
+                { name: 'backgroundColor', type: 'color', label: 'Background' },
+                { name: 'foregroundColor', type: 'color', label: 'Blob Color' },
+                { name: 'blobCount', type: 'range', label: 'Blob Count', min: 10, max: 100, step: 5 },
+                { name: 'blobCountMobile', type: 'range', label: 'Blob Count Mobile', min: 10, max: 60, step: 5 },
+                { name: 'maxRadius', type: 'range', label: 'Max Radius', min: 20, max: 150, step: 5 },
+                { name: 'influenceRadius', type: 'range', label: 'Influence Radius', min: 100, max: 500, step: 10 },
+                { name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1 }
+            ],
+            lines: [
+                { name: 'backgroundColor', type: 'color', label: 'Background' },
+                { name: 'middlegroundColor', type: 'color', label: 'Line Color' },
+                { name: 'foregroundColor', type: 'color', label: 'Glow Color' },
+                { name: 'lineCount', type: 'range', label: 'Line Count', min: 10, max: 100, step: 5 },
+                { name: 'lineCountMobile', type: 'range', label: 'Line Count Mobile', min: 10, max: 60, step: 5 },
+                { name: 'mouseRepel', type: 'checkbox', label: 'Mouse Repel' },
+                { name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse' },
+                { name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1 },
+                { name: 'repelStrength', type: 'range', label: 'Repel Strength', min: 0, max: 1, step: 0.05 }
+            ],
+            ping: [
+                { name: 'backgroundColor', type: 'color', label: 'Background' },
+                { name: 'middlegroundColor', type: 'color', label: 'Ping Color' },
+                { name: 'foregroundColor', type: 'color', label: 'Accent Color' },
+                { name: 'pingFrequency', type: 'range', label: 'Frequency (seconds)', min: 0.5, max: 5, step: 0.1 },
+                { name: 'growSpeed', type: 'range', label: 'Grow Speed', min: 0.2, max: 2, step: 0.1 },
+                { name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1 }
             ]
         };
 
@@ -1011,7 +1329,8 @@
             const type = knvasElement.getAttribute('type');
             const options = Array.from(knvasElement.querySelectorAll('option'));
 
-            let code = `<knvas type="${type}">`;
+            let code = '<script src="https://knvas.dev/components/knvas.js"><' + '/script>\n\n';
+            code += `<knvas type="${type}">`;
 
             if (options.length > 0) {
                 code += '\n';
@@ -1195,8 +1514,5 @@
     </script>
 
     <script src="components/knvas.js"></script>
-    <script src="components/stars.js"></script>
-    <script src="components/grid.js"></script>
-    <script src="components/smoke.js"></script>
 </body>
 </html>
