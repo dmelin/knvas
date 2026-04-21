@@ -4,12 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Knvas - Interactive Grid</title>
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
+    <nav class="sidebar">
+        <div class="sidebar-section">
+            <h2 class="section-title">Knvases</h2>
+            <a href="#" class="menu-item">
+                <span class="material-symbols-outlined">star</span>
+                <span class="menu-text">Stars</span>
+            </a>
+            <a href="#" class="menu-item">
+                <span class="material-symbols-outlined">show_chart</span>
+                <span class="menu-text">Lines</span>
+            </a>
+            <a href="#" class="menu-item">
+                <span class="material-symbols-outlined">visibility</span>
+                <span class="menu-text">Eyes</span>
+            </a>
+        </div>
+        <div class="sidebar-section">
+            <h2 class="section-title">Info</h2>
+            <a href="#" class="menu-item">
+                <span class="material-symbols-outlined">help_outline</span>
+                <span class="menu-text">How to use</span>
+            </a>
+            <a href="#" class="menu-item">
+                <span class="material-symbols-outlined">info</span>
+                <span class="menu-text">About</span>
+            </a>
+            <a href="#" class="menu-item">
+                <span class="material-symbols-outlined">description</span>
+                <span class="menu-text">License</span>
+            </a>
+        </div>
+        <div class="sidebar-section">
+            <a href="#" class="menu-item" data-action="clear">
+                <span class="material-symbols-outlined">close</span>
+                <span class="menu-text">Clear</span>
+            </a>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="corner top-left"></div>
         <div class="corner bottom-right"></div>
+        <div class="container-content">knvas</div>
+    </div>
+
+    <div class="settings-panel" style="display: none;">
+        <h3 class="settings-title">Settings</h3>
+        <div class="settings-content"></div>
+    </div>
+
+    <div class="code-display" style="display: none;">
+        <h3 class="code-title">Code</h3>
+        <pre class="code-content"><code></code></pre>
     </div>
 
     <script>
@@ -22,10 +76,10 @@
         let dragCorner = null;
 
         let bounds = {
-            left: window.innerWidth / 3,
-            top: window.innerHeight / 3,
-            right: (window.innerWidth * 2) / 3,
-            bottom: (window.innerHeight * 2) / 3
+            left: window.innerWidth * 0.25,
+            top: window.innerHeight * 0.20,
+            right: window.innerWidth * 0.75,
+            bottom: window.innerHeight * 0.80
         };
 
         function updateLayout() {
@@ -78,6 +132,276 @@
         });
 
         updateLayout();
+
+        // Settings panel management
+        const settingsPanel = document.querySelector('.settings-panel');
+        const settingsContent = document.querySelector('.settings-content');
+
+        // Menu handlers
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                if (item.dataset.action === 'clear') {
+                    // Clear all knvas elements from container
+                    container.querySelectorAll('knvas').forEach(el => el.remove());
+                    settingsPanel.style.display = 'none';
+                    codeDisplay.style.display = 'none';
+                } else {
+                    const type = item.querySelector('.menu-text').textContent.toLowerCase();
+
+                    // Remove existing knvas elements
+                    container.querySelectorAll('knvas').forEach(el => el.remove());
+
+                    // Add new knvas element
+                    const knvasElement = document.createElement('knvas');
+                    knvasElement.setAttribute('type', type);
+
+                    // Add options based on type
+                    if (type === 'stars') {
+                        // Enable mouse attraction
+                        const attract = document.createElement('option');
+                        attract.setAttribute('name', 'mouseAttract');
+                        attract.setAttribute('value', 'true');
+                        knvasElement.appendChild(attract);
+
+                        // Enable glow at mouse
+                        const glow = document.createElement('option');
+                        glow.setAttribute('name', 'glowAtMouse');
+                        glow.setAttribute('value', 'true');
+                        knvasElement.appendChild(glow);
+
+                        // Set background color
+                        const bg = document.createElement('option');
+                        bg.setAttribute('name', 'backgroundColor');
+                        bg.setAttribute('value', '#333');
+                        knvasElement.appendChild(bg);
+
+                        // Set star color (middleground)
+                        const mg = document.createElement('option');
+                        mg.setAttribute('name', 'middlegroundColor');
+                        mg.setAttribute('value', '#09c');
+                        knvasElement.appendChild(mg);
+
+                        // Set glow color (foreground)
+                        const fg = document.createElement('option');
+                        fg.setAttribute('name', 'foregroundColor');
+                        fg.setAttribute('value', '#fff');
+                        knvasElement.appendChild(fg);
+
+                        // Set line opacity
+                        const opacity = document.createElement('option');
+                        opacity.setAttribute('name', 'lineOpacity');
+                        opacity.setAttribute('value', '0.3');
+                        knvasElement.appendChild(opacity);
+
+                        // Set star count
+                        const count = document.createElement('option');
+                        count.setAttribute('name', 'starCount');
+                        count.setAttribute('value', '500');
+                        knvasElement.appendChild(count);
+                    }
+
+                    container.appendChild(knvasElement);
+                    populateSettings(type);
+                }
+            });
+        });
+
+        // Component settings definitions
+        const componentSettings = {
+            stars: [
+                { name: 'backgroundColor', type: 'color', label: 'Background' },
+                { name: 'middlegroundColor', type: 'color', label: 'Star Color' },
+                { name: 'foregroundColor', type: 'color', label: 'Glow Color' },
+                { name: 'lineOpacity', type: 'range', label: 'Line Opacity', min: 0, max: 1, step: 0.05 },
+                { name: 'starCount', type: 'number', label: 'Star Count' },
+                { name: 'mouseAttract', type: 'checkbox', label: 'Mouse Attract' },
+                { name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse' }
+            ]
+        };
+
+        function populateSettings(type) {
+            settingsContent.innerHTML = '';
+            const settings = componentSettings[type];
+
+            if (!settings) {
+                settingsPanel.style.display = 'none';
+                return;
+            }
+
+            const knvasElement = container.querySelector('knvas');
+            if (!knvasElement) return;
+
+            settings.forEach(setting => {
+                const settingDiv = document.createElement('div');
+                settingDiv.className = setting.type === 'checkbox' ? 'setting-item checkbox-item' : 'setting-item';
+
+                if (setting.type === 'checkbox') {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = setting.name;
+
+                    const optionEl = knvasElement.querySelector(`option[name="${setting.name}"]`);
+                    checkbox.checked = optionEl ? (optionEl.getAttribute('value') === 'true') : false;
+
+                    checkbox.addEventListener('change', () => {
+                        updateOption(setting.name, checkbox.checked ? 'true' : 'false');
+                    });
+
+                    const label = document.createElement('label');
+                    label.htmlFor = setting.name;
+                    label.textContent = setting.label;
+
+                    settingDiv.appendChild(checkbox);
+                    settingDiv.appendChild(label);
+                } else {
+                    const label = document.createElement('label');
+                    label.htmlFor = setting.name;
+                    label.textContent = setting.label;
+
+                    const input = document.createElement('input');
+                    input.type = setting.type;
+                    input.id = setting.name;
+
+                    // Set range-specific attributes
+                    if (setting.type === 'range') {
+                        input.min = setting.min;
+                        input.max = setting.max;
+                        input.step = setting.step;
+                    }
+
+                    const optionEl = knvasElement.querySelector(`option[name="${setting.name}"]`);
+                    input.value = optionEl ? optionEl.getAttribute('value') : (setting.type === 'range' ? setting.min : '');
+
+                    input.addEventListener('change', () => {
+                        updateOption(setting.name, input.value);
+                    });
+
+                    // For range inputs, also update on input event for live feedback
+                    if (setting.type === 'range') {
+                        input.addEventListener('input', () => {
+                            updateOption(setting.name, input.value);
+                        });
+                    }
+
+                    settingDiv.appendChild(label);
+                    settingDiv.appendChild(input);
+                }
+
+                settingsContent.appendChild(settingDiv);
+            });
+
+            settingsPanel.style.display = 'block';
+            updateSettingsPanelPosition();
+            updateCodeDisplay();
+        }
+
+        function updateOption(name, value) {
+            const knvasElement = container.querySelector('knvas');
+            if (!knvasElement) return;
+
+            let optionEl = knvasElement.querySelector(`option[name="${name}"]`);
+
+            if (!optionEl) {
+                optionEl = document.createElement('option');
+                optionEl.setAttribute('name', name);
+                knvasElement.appendChild(optionEl);
+            }
+
+            optionEl.setAttribute('value', value);
+
+            // Trigger knvas reinitialization
+            knvasElement.remove();
+            container.appendChild(knvasElement);
+
+            // Update code display
+            updateCodeDisplay();
+        }
+
+        function updateSettingsPanelPosition() {
+            if (settingsPanel.style.display === 'none') return;
+
+            const containerRect = container.getBoundingClientRect();
+            const panelWidth = 130;
+            const gap = 10;
+
+            // Calculate desired position
+            let left = containerRect.right + gap;
+
+            // Ensure panel stays within viewport
+            const maxLeft = window.innerWidth - panelWidth - gap;
+            left = Math.min(left, maxLeft);
+
+            settingsPanel.style.left = left + 'px';
+            settingsPanel.style.top = containerRect.top + 'px';
+            settingsPanel.style.height = containerRect.height + 'px';
+        }
+
+        // Code display management
+        const codeDisplay = document.querySelector('.code-display');
+        const codeContent = document.querySelector('.code-content code');
+
+        function generateCode() {
+            const knvasElement = container.querySelector('knvas');
+            if (!knvasElement) return '';
+
+            const type = knvasElement.getAttribute('type');
+            const options = Array.from(knvasElement.querySelectorAll('option'));
+
+            let code = `<knvas type="${type}">`;
+
+            if (options.length > 0) {
+                code += '\n';
+                options.forEach(option => {
+                    const name = option.getAttribute('name');
+                    const value = option.getAttribute('value');
+                    code += `  <option name="${name}" value="${value}">\n`;
+                });
+            }
+
+            code += '</knvas>';
+            return code;
+        }
+
+        function updateCodeDisplay() {
+            const code = generateCode();
+            if (code) {
+                codeContent.textContent = code;
+                codeDisplay.style.display = 'block';
+                updateCodeDisplayPosition();
+            } else {
+                codeDisplay.style.display = 'none';
+            }
+        }
+
+        function updateCodeDisplayPosition() {
+            if (codeDisplay.style.display === 'none') return;
+
+            const containerRect = container.getBoundingClientRect();
+            const gap = 10;
+            const codeHeight = 130;
+
+            codeDisplay.style.left = containerRect.left + 'px';
+            codeDisplay.style.top = (containerRect.bottom + gap) + 'px';
+            codeDisplay.style.width = containerRect.width + 'px';
+        }
+
+        // Update both panels when container moves or window resizes
+        const originalUpdateLayout = updateLayout;
+        updateLayout = function() {
+            originalUpdateLayout();
+            updateSettingsPanelPosition();
+            updateCodeDisplayPosition();
+        };
+
+        window.addEventListener('resize', () => {
+            updateSettingsPanelPosition();
+            updateCodeDisplayPosition();
+        });
     </script>
+
+    <script src="components/knvas.js"></script>
+    <script src="components/stars.js"></script>
 </body>
 </html>
