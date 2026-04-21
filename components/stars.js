@@ -1,25 +1,19 @@
-class Stars {
+class Stars extends KnvasComponent {
     constructor(container, options = {}) {
-        this.container = container;
+        super(container);
         this.options = {
-            backgroundColor: options.backgroundColor || '#2d1b3d',
-            middlegroundColor: options.middlegroundColor || '#ff69b4',
-            foregroundColor: options.foregroundColor || '#ffffff',
+            backgroundColor: options.backgroundColor || '#1a2332',
+            middlegroundColor: options.middlegroundColor || '#00d4ff',
+            foregroundColor: options.foregroundColor || '#d946ef',
             lineOpacity: parseFloat(options.lineOpacity) || 0.3,
             starCount: options.starCount || null,
             mouseAttract: options.mouseAttract === 'true' || options.mouseAttract === true,
-            glowAtMouse: options.glowAtMouse === 'true' || options.glowAtMouse === true
+            glowAtMouse: options.glowAtMouse === 'true' || options.glowAtMouse === true,
+            tailSpeed: parseFloat(options.tailSpeed) || 0
         };
-        this.canvas = null;
-        this.ctx = null;
-        this.animationFrame = null;
-        this.originalBackground = null;
         this.stars = [];
         this.connectionDistance = 100;
         this.connectionDistanceSq = 100 * 100; // avoid sqrt in hot loop
-        this.mouse = { x: null, y: null, inBounds: false };
-        this.attractionActive = false;
-        this.attractionTimeout = null;
     }
 
     init() {
@@ -27,73 +21,11 @@ class Stars {
         this.createCanvas();
         this.setupCanvas();
         this.initStars();
-        this.setupMouseTracking();
+        if (this.options.mouseAttract || this.options.glowAtMouse || this.options.tailSpeed > 0) {
+            this.setupMouseTracking();
+        }
         this.animate();
-        this.handleResize();
-    }
-
-    setupMouseTracking() {
-        if (!this.options.mouseAttract && !this.options.glowAtMouse) return;
-
-        this.mouseMoveHandler = (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            this.mouse.x = e.clientX - rect.left;
-            this.mouse.y = e.clientY - rect.top;
-            this.mouse.inBounds = true;
-            this.attractionActive = true;
-        };
-
-        this.mouseLeaveHandler = () => {
-            this.mouse.inBounds = false;
-            this.attractionActive = false;
-        };
-
-        this.clickHandler = (e) => {
-            if (!this.mouse.inBounds) {
-                const rect = this.canvas.getBoundingClientRect();
-                this.mouse.x = e.clientX - rect.left;
-                this.mouse.y = e.clientY - rect.top;
-                this.attractionActive = true;
-
-                if (this.attractionTimeout) {
-                    clearTimeout(this.attractionTimeout);
-                }
-
-                this.attractionTimeout = setTimeout(() => {
-                    if (!this.mouse.inBounds) {
-                        this.attractionActive = false;
-                    }
-                }, 3000);
-            }
-        };
-
-        document.body.addEventListener('mousemove', this.mouseMoveHandler);
-        this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler);
-        this.canvas.addEventListener('click', this.clickHandler);
-    }
-
-    saveAndClearBackground() {
-        this.originalBackground = this.container.style.background;
-        this.container.style.background = 'none';
-    }
-
-    createCanvas() {
-        this.canvas = document.createElement('canvas');
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
-        this.canvas.style.display = 'block';
-        this.canvas.style.position = 'absolute';
-        this.canvas.style.top = '0';
-        this.canvas.style.left = '0';
-        this.canvas.style.zIndex = '-1';
-        this.container.appendChild(this.canvas);
-        this.ctx = this.canvas.getContext('2d');
-    }
-
-    setupCanvas() {
-        const rect = this.container.getBoundingClientRect();
-        this.canvas.width = rect.width;
-        this.canvas.height = rect.height;
+        this.handleResize(() => this.initStars());
     }
 
     initStars() {
@@ -122,10 +54,12 @@ class Stars {
     }
 
     updateStars() {
+        const effectiveMouse = this.getEffectiveMouse(this.options.tailSpeed);
+
         this.stars.forEach(star => {
-            if (this.options.mouseAttract && this.attractionActive && this.mouse.x !== null && this.mouse.y !== null) {
-                const dx = this.mouse.x - star.x;
-                const dy = this.mouse.y - star.y;
+            if (this.options.mouseAttract && this.attractionActive && effectiveMouse.x !== null && effectiveMouse.y !== null) {
+                const dx = effectiveMouse.x - star.x;
+                const dy = effectiveMouse.y - star.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance > 0) {
@@ -168,50 +102,6 @@ class Stars {
         });
     }
 
-    getWhitenessFactor(x, y) {
-        if (!this.options.glowAtMouse || !this.attractionActive || this.mouse.x === null || this.mouse.y === null) {
-            return 0;
-        }
-
-        const dx = this.mouse.x - x;
-        const dy = this.mouse.y - y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const brightnessRange = 200;
-
-        return Math.max(0, 0.95 * (1 - (distance / brightnessRange)));
-    }
-
-    brightenColor(baseColor, targetColor, amount) {
-        if (amount === 0) {
-            return baseColor;
-        }
-
-        // Parse base color
-        let baseHex = baseColor.replace('#', '');
-        if (baseHex.length === 3) {
-            baseHex = baseHex[0] + baseHex[0] + baseHex[1] + baseHex[1] + baseHex[2] + baseHex[2];
-        }
-        let r1 = parseInt(baseHex.substring(0, 2), 16);
-        let g1 = parseInt(baseHex.substring(2, 4), 16);
-        let b1 = parseInt(baseHex.substring(4, 6), 16);
-
-        // Parse target color
-        let targetHex = targetColor.replace('#', '');
-        if (targetHex.length === 3) {
-            targetHex = targetHex[0] + targetHex[0] + targetHex[1] + targetHex[1] + targetHex[2] + targetHex[2];
-        }
-        let r2 = parseInt(targetHex.substring(0, 2), 16);
-        let g2 = parseInt(targetHex.substring(2, 4), 16);
-        let b2 = parseInt(targetHex.substring(4, 6), 16);
-
-        // Interpolate
-        const r = Math.floor(r1 + (r2 - r1) * amount);
-        const g = Math.floor(g1 + (g2 - g1) * amount);
-        const b = Math.floor(b1 + (b2 - b1) * amount);
-
-        return `rgb(${r}, ${g}, ${b})`;
-    }
-
     draw() {
         this.ctx.fillStyle = this.options.backgroundColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -219,7 +109,7 @@ class Stars {
         // Precompute whiteness per star once per frame (O(n) instead of O(n²))
         const glowActive = this.options.glowAtMouse && this.attractionActive;
         const starWhiteness = glowActive
-            ? this.stars.map(s => this.getWhitenessFactor(s.x, s.y))
+            ? this.stars.map(s => this.getWhitenessFactor(s.x, s.y, this.options.glowAtMouse, this.options.tailSpeed))
             : null;
 
         // Draw connections
@@ -272,45 +162,13 @@ class Stars {
     }
 
     animate() {
+        this.updateFPS();
+        this.updateLazyMouse(this.options.tailSpeed);
         this.updateStars();
         this.draw();
         this.animationFrame = requestAnimationFrame(() => this.animate());
     }
 
-    handleResize() {
-        this.resizeObserver = new ResizeObserver(() => {
-            this.setupCanvas();
-            this.initStars();
-        });
-        this.resizeObserver.observe(this.container);
-    }
-
-    destroy() {
-        if (this.resizeObserver) {
-            this.resizeObserver.disconnect();
-        }
-        if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-        }
-        if (this.attractionTimeout) {
-            clearTimeout(this.attractionTimeout);
-        }
-        if (this.mouseMoveHandler) {
-            document.body.removeEventListener('mousemove', this.mouseMoveHandler);
-        }
-        if (this.mouseLeaveHandler && this.canvas) {
-            this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler);
-        }
-        if (this.clickHandler && this.canvas) {
-            this.canvas.removeEventListener('click', this.clickHandler);
-        }
-        if (this.canvas) {
-            this.canvas.remove();
-        }
-        if (this.originalBackground !== null) {
-            this.container.style.background = this.originalBackground;
-        }
-    }
 }
 
 knvas.registerComponent('stars', Stars);

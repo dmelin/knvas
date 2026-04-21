@@ -19,8 +19,8 @@
                 <span class="menu-text">Stars</span>
             </a>
             <a href="#" class="menu-item">
-                <span class="material-symbols-outlined">show_chart</span>
-                <span class="menu-text">Lines</span>
+                <span class="material-symbols-outlined">grid_on</span>
+                <span class="menu-text">Grid</span>
             </a>
             <a href="#" class="menu-item">
                 <span class="material-symbols-outlined">visibility</span>
@@ -51,10 +51,21 @@
     </nav>
 
     <div class="container">
-        <div class="corner top-left"></div>
-        <div class="corner bottom-right"></div>
-        <div class="container-content">
-            <img src="assets/images/logo.png" alt="Knvas Logo" class="logo">
+    </div>
+
+    <div class="container-content">
+        <img src="assets/images/logo.png" alt="Knvas Logo" class="logo">
+    </div>
+
+    <div class="toolbox" style="display: none;">
+        <button class="tool-button" id="flip-button" title="Flip canvas">
+            <span class="material-symbols-outlined">flip</span>
+        </button>
+        <button class="tool-button" id="three-d-button" title="Toggle 3D perspective">
+            <span class="material-symbols-outlined">view_in_ar</span>
+        </button>
+        <div class="fps-display">
+            <span id="fps-value">0</span> fps
         </div>
     </div>
 
@@ -74,13 +85,7 @@
     </div>
 
     <script>
-        const minSize = 150;
         const container = document.querySelector('.container');
-        const topLeft = document.querySelector('.corner.top-left');
-        const bottomRight = document.querySelector('.corner.bottom-right');
-
-        let isDragging = false;
-        let dragCorner = null;
 
         let bounds = {
             left: window.innerWidth * 0.25,
@@ -96,40 +101,8 @@
             container.style.height = (bounds.bottom - bounds.top) + 'px';
         }
 
-        topLeft.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            dragCorner = 'topLeft';
-            e.preventDefault();
-            e.stopPropagation();
-        });
-
-        bottomRight.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            dragCorner = 'bottomRight';
-            e.preventDefault();
-            e.stopPropagation();
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-
-            if (dragCorner === 'topLeft') {
-                bounds.left = Math.max(minSize, Math.min(e.clientX, bounds.right - minSize));
-                bounds.top = Math.max(minSize, Math.min(e.clientY, bounds.bottom - minSize));
-            } else if (dragCorner === 'bottomRight') {
-                bounds.right = Math.max(bounds.left + minSize, Math.min(e.clientX, window.innerWidth - minSize));
-                bounds.bottom = Math.max(bounds.top + minSize, Math.min(e.clientY, window.innerHeight - minSize));
-            }
-
-            updateLayout();
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            dragCorner = null;
-        });
-
         window.addEventListener('resize', () => {
+            const minSize = 150;
             bounds.left = Math.min(bounds.left, window.innerWidth - minSize * 2);
             bounds.top = Math.min(bounds.top, window.innerHeight - minSize * 2);
             bounds.right = Math.max(bounds.left + minSize, Math.min(bounds.right, window.innerWidth - minSize));
@@ -139,6 +112,107 @@
         });
 
         updateLayout();
+
+        // Theme definitions
+        const themes = {
+            stars: {
+                'Starfield': {
+                    backgroundColor: '#0a0e27',
+                    middlegroundColor: '#ffffff',
+                    foregroundColor: '#00d4ff',
+                    lineOpacity: '0.3',
+                    starCount: '400',
+                    mouseAttract: 'false',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0'
+                },
+                'Fire': {
+                    backgroundColor: '#1a0000',
+                    middlegroundColor: '#ff4500',
+                    foregroundColor: '#ffff00',
+                    lineOpacity: '0.5',
+                    starCount: '600',
+                    mouseAttract: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0.3'
+                },
+                'Aurora': {
+                    backgroundColor: '#001a1a',
+                    middlegroundColor: '#00ff88',
+                    foregroundColor: '#88ffff',
+                    lineOpacity: '0.4',
+                    starCount: '300',
+                    mouseAttract: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0.5'
+                },
+                'Cyberpunk': {
+                    backgroundColor: '#0d0221',
+                    middlegroundColor: '#ff006e',
+                    foregroundColor: '#00fff5',
+                    lineOpacity: '0.6',
+                    starCount: '500',
+                    mouseAttract: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0'
+                }
+            },
+            grid: {
+                'Blueprint': {
+                    backgroundColor: '#0a2463',
+                    middlegroundColor: '#3e92cc',
+                    foregroundColor: '#ffffff',
+                    lineOpacity: '0.8',
+                    columnCount: '10',
+                    rowCount: '12',
+                    mouseAttract: 'false',
+                    glowAtMouse: 'false',
+                    tailSpeed: '0',
+                    gravityFactor: '0.3'
+                },
+                'Neon Grid': {
+                    backgroundColor: '#ff006e',
+                    middlegroundColor: '#00fff5',
+                    foregroundColor: '#ffffff',
+                    lineOpacity: '1',
+                    columnCount: '15',
+                    rowCount: '18',
+                    mouseAttract: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0.4',
+                    gravityFactor: '0.5'
+                },
+                'Organic': {
+                    backgroundColor: '#2d5016',
+                    middlegroundColor: '#90ee90',
+                    foregroundColor: '#ffffff',
+                    lineOpacity: '0.7',
+                    columnCount: '12',
+                    rowCount: '14',
+                    mouseAttract: 'true',
+                    glowAtMouse: 'true',
+                    tailSpeed: '0.6',
+                    gravityFactor: '0.7'
+                },
+                'Minimal': {
+                    backgroundColor: '#f5f5f5',
+                    middlegroundColor: '#333333',
+                    foregroundColor: '#666666',
+                    lineOpacity: '1',
+                    columnCount: '10',
+                    rowCount: '12',
+                    mouseAttract: 'false',
+                    glowAtMouse: 'false',
+                    tailSpeed: '0',
+                    gravityFactor: '0.3'
+                }
+            }
+        };
+
+        // Helper function to get active knvas element
+        function getKnvasElement() {
+            return document.querySelector('knvas');
+        }
 
         // Settings panel management
         const settingsPanel = document.querySelector('.settings-panel');
@@ -150,17 +224,18 @@
                 e.preventDefault();
 
                 if (item.dataset.action === 'clear') {
-                    // Clear all knvas elements from container
-                    container.querySelectorAll('knvas').forEach(el => el.remove());
+                    // Clear all knvas elements from anywhere
+                    document.querySelectorAll('knvas').forEach(el => el.remove());
                     settingsPanel.style.display = 'none';
                     codeDisplay.style.display = 'none';
+                    document.querySelector('.toolbox').style.display = 'none';
                 } else {
                     const type = item.querySelector('.menu-text').textContent.toLowerCase();
 
-                    // Remove existing knvas elements
-                    container.querySelectorAll('knvas').forEach(el => el.remove());
+                    // Remove existing knvas elements from anywhere
+                    document.querySelectorAll('knvas').forEach(el => el.remove());
 
-                    // Add new knvas element
+                    // Add new knvas element to container
                     const knvasElement = document.createElement('knvas');
                     knvasElement.setAttribute('type', type);
 
@@ -181,19 +256,19 @@
                         // Set background color
                         const bg = document.createElement('option');
                         bg.setAttribute('name', 'backgroundColor');
-                        bg.setAttribute('value', '#333');
+                        bg.setAttribute('value', '#1a2332');
                         knvasElement.appendChild(bg);
 
                         // Set star color (middleground)
                         const mg = document.createElement('option');
                         mg.setAttribute('name', 'middlegroundColor');
-                        mg.setAttribute('value', '#09c');
+                        mg.setAttribute('value', '#00d4ff');
                         knvasElement.appendChild(mg);
 
                         // Set glow color (foreground)
                         const fg = document.createElement('option');
                         fg.setAttribute('name', 'foregroundColor');
-                        fg.setAttribute('value', '#fff');
+                        fg.setAttribute('value', '#d946ef');
                         knvasElement.appendChild(fg);
 
                         // Set line opacity
@@ -205,8 +280,74 @@
                         // Set star count
                         const count = document.createElement('option');
                         count.setAttribute('name', 'starCount');
-                        count.setAttribute('value', '500');
+                        count.setAttribute('value', '400');
                         knvasElement.appendChild(count);
+
+                        // Set tail speed
+                        const tail = document.createElement('option');
+                        tail.setAttribute('name', 'tailSpeed');
+                        tail.setAttribute('value', '0');
+                        knvasElement.appendChild(tail);
+                    } else if (type === 'grid') {
+                        // Set background color
+                        const bg = document.createElement('option');
+                        bg.setAttribute('name', 'backgroundColor');
+                        bg.setAttribute('value', '#1a2332');
+                        knvasElement.appendChild(bg);
+
+                        // Set line/dot color (middleground)
+                        const mg = document.createElement('option');
+                        mg.setAttribute('name', 'middlegroundColor');
+                        mg.setAttribute('value', '#00d4ff');
+                        knvasElement.appendChild(mg);
+
+                        // Set glow color (foreground)
+                        const fg = document.createElement('option');
+                        fg.setAttribute('name', 'foregroundColor');
+                        fg.setAttribute('value', '#d946ef');
+                        knvasElement.appendChild(fg);
+
+                        // Set line opacity
+                        const opacity = document.createElement('option');
+                        opacity.setAttribute('name', 'lineOpacity');
+                        opacity.setAttribute('value', '1');
+                        knvasElement.appendChild(opacity);
+
+                        // Set column count
+                        const cols = document.createElement('option');
+                        cols.setAttribute('name', 'columnCount');
+                        cols.setAttribute('value', '20');
+                        knvasElement.appendChild(cols);
+
+                        // Set row count
+                        const rows = document.createElement('option');
+                        rows.setAttribute('name', 'rowCount');
+                        rows.setAttribute('value', '24');
+                        knvasElement.appendChild(rows);
+
+                        // Enable mouse attraction
+                        const attract = document.createElement('option');
+                        attract.setAttribute('name', 'mouseAttract');
+                        attract.setAttribute('value', 'false');
+                        knvasElement.appendChild(attract);
+
+                        // Enable glow at mouse
+                        const glow = document.createElement('option');
+                        glow.setAttribute('name', 'glowAtMouse');
+                        glow.setAttribute('value', 'false');
+                        knvasElement.appendChild(glow);
+
+                        // Set tail speed
+                        const tail = document.createElement('option');
+                        tail.setAttribute('name', 'tailSpeed');
+                        tail.setAttribute('value', '0');
+                        knvasElement.appendChild(tail);
+
+                        // Set gravity factor
+                        const gravity = document.createElement('option');
+                        gravity.setAttribute('name', 'gravityFactor');
+                        gravity.setAttribute('value', '0.3');
+                        knvasElement.appendChild(gravity);
                     }
 
                     container.appendChild(knvasElement);
@@ -224,7 +365,20 @@
                 { name: 'lineOpacity', type: 'range', label: 'Line Opacity', min: 0, max: 1, step: 0.05 },
                 { name: 'starCount', type: 'number', label: 'Star Count' },
                 { name: 'mouseAttract', type: 'checkbox', label: 'Mouse Attract' },
-                { name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse' }
+                { name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse' },
+                { name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0, max: 1, step: 0.05 }
+            ],
+            grid: [
+                { name: 'backgroundColor', type: 'color', label: 'Background' },
+                { name: 'middlegroundColor', type: 'color', label: 'Line Color' },
+                { name: 'foregroundColor', type: 'color', label: 'Glow Color' },
+                { name: 'lineOpacity', type: 'range', label: 'Line Opacity', min: 0, max: 1, step: 0.05 },
+                { name: 'columnCount', type: 'number', label: 'Columns', min: 1, max: 20 },
+                { name: 'rowCount', type: 'number', label: 'Rows', min: 1, max: 20 },
+                { name: 'mouseAttract', type: 'checkbox', label: 'Mouse Attract' },
+                { name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse' },
+                { name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0, max: 1, step: 0.05 },
+                { name: 'gravityFactor', type: 'range', label: 'Gravity', min: 0, max: 1, step: 0.05 }
             ]
         };
 
@@ -237,8 +391,59 @@
                 return;
             }
 
-            const knvasElement = container.querySelector('knvas');
+            const knvasElement = getKnvasElement();
             if (!knvasElement) return;
+
+            // Add theme selector
+            const themeOptions = themes[type];
+            if (themeOptions) {
+                const themeDiv = document.createElement('div');
+                themeDiv.className = 'setting-item';
+
+                const themeLabel = document.createElement('label');
+                themeLabel.htmlFor = 'theme-selector';
+                themeLabel.textContent = 'Theme';
+
+                const themeSelect = document.createElement('select');
+                themeSelect.id = 'theme-selector';
+
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Select Theme --';
+                themeSelect.appendChild(defaultOption);
+
+                // Add theme options
+                Object.keys(themeOptions).forEach(themeName => {
+                    const option = document.createElement('option');
+                    option.value = themeName;
+                    option.textContent = themeName;
+                    themeSelect.appendChild(option);
+                });
+
+                themeSelect.addEventListener('change', () => {
+                    const selectedTheme = themeSelect.value;
+                    if (selectedTheme && themeOptions[selectedTheme]) {
+                        const themeConfig = themeOptions[selectedTheme];
+                        // Apply all theme settings
+                        Object.keys(themeConfig).forEach(key => {
+                            updateOption(key, themeConfig[key]);
+                        });
+                        // Repopulate settings to show updated values
+                        populateSettings(type);
+                    }
+                });
+
+                themeDiv.appendChild(themeLabel);
+                themeDiv.appendChild(themeSelect);
+                settingsContent.appendChild(themeDiv);
+
+                // Add separator
+                const separator = document.createElement('div');
+                separator.style.borderTop = '1px solid #e0e0e0';
+                separator.style.margin = '10px 0';
+                settingsContent.appendChild(separator);
+            }
 
             settings.forEach(setting => {
                 const settingDiv = document.createElement('div');
@@ -302,10 +507,12 @@
             settingsPanel.style.display = 'block';
             updateSettingsPanelPosition();
             updateCodeDisplay();
+            toolbox.style.display = 'flex';
+            updateToolboxPosition();
         }
 
         function updateOption(name, value) {
-            const knvasElement = container.querySelector('knvas');
+            const knvasElement = getKnvasElement();
             if (!knvasElement) return;
 
             let optionEl = knvasElement.querySelector(`option[name="${name}"]`);
@@ -318,9 +525,10 @@
 
             optionEl.setAttribute('value', value);
 
-            // Trigger knvas reinitialization
+            // Trigger knvas reinitialization - keep it in the same parent
+            const parent = knvasElement.parentElement;
             knvasElement.remove();
-            container.appendChild(knvasElement);
+            parent.appendChild(knvasElement);
 
             // Update code display
             updateCodeDisplay();
@@ -329,20 +537,19 @@
         function updateSettingsPanelPosition() {
             if (settingsPanel.style.display === 'none') return;
 
-            const containerRect = container.getBoundingClientRect();
             const panelWidth = 130;
             const gap = 10;
 
-            // Calculate desired position
-            let left = containerRect.right + gap;
+            // Use bounds instead of getBoundingClientRect to avoid 3D transform issues
+            let left = bounds.right + gap;
 
             // Ensure panel stays within viewport
             const maxLeft = window.innerWidth - panelWidth - gap;
             left = Math.min(left, maxLeft);
 
             settingsPanel.style.left = left + 'px';
-            settingsPanel.style.top = containerRect.top + 'px';
-            settingsPanel.style.height = containerRect.height + 'px';
+            settingsPanel.style.top = bounds.top + 'px';
+            settingsPanel.style.height = (bounds.bottom - bounds.top) + 'px';
         }
 
         // Code display management
@@ -350,7 +557,7 @@
         const codeContent = document.querySelector('.code-content code');
 
         function generateCode() {
-            const knvasElement = container.querySelector('knvas');
+            const knvasElement = getKnvasElement();
             if (!knvasElement) return '';
 
             const type = knvasElement.getAttribute('type');
@@ -385,13 +592,12 @@
         function updateCodeDisplayPosition() {
             if (codeDisplay.style.display === 'none') return;
 
-            const containerRect = container.getBoundingClientRect();
             const gap = 10;
-            const codeHeight = 130;
 
-            codeDisplay.style.left = containerRect.left + 'px';
-            codeDisplay.style.top = (containerRect.bottom + gap) + 'px';
-            codeDisplay.style.width = containerRect.width + 'px';
+            // Use bounds instead of getBoundingClientRect to avoid 3D transform issues
+            codeDisplay.style.left = bounds.left + 'px';
+            codeDisplay.style.top = (bounds.bottom + gap) + 'px';
+            codeDisplay.style.width = (bounds.right - bounds.left) + 'px';
         }
 
         // Update both panels when container moves or window resizes
@@ -421,13 +627,72 @@
             });
         });
 
+        // Toolbox management
+        const toolbox = document.querySelector('.toolbox');
+        const flipButton = document.querySelector('#flip-button');
+        const threeDButton = document.querySelector('#three-d-button');
+        const fpsValue = document.querySelector('#fps-value');
+
+        function updateToolboxPosition() {
+            if (toolbox.style.display === 'none') return;
+
+            const gap = 10;
+
+            // Use bounds instead of getBoundingClientRect to avoid 3D transform issues
+            toolbox.style.left = (bounds.right - toolbox.offsetWidth) + 'px';
+            toolbox.style.top = (bounds.top - toolbox.offsetHeight - gap) + 'px';
+        }
+
+        // Flip button functionality
+        flipButton.addEventListener('click', () => {
+            const knvasElement = getKnvasElement();
+            if (!knvasElement) return;
+
+            // Toggle between container and body
+            if (knvasElement.parentElement === container) {
+                document.body.appendChild(knvasElement);
+            } else {
+                container.appendChild(knvasElement);
+            }
+        });
+
+        // 3D button functionality
+        threeDButton.addEventListener('click', () => {
+            container.classList.toggle('is3D');
+            threeDButton.classList.toggle('active');
+        });
+
+        // Update FPS display
+        function updateFPSDisplay() {
+            const knvasElement = getKnvasElement();
+            if (knvasElement) {
+                const instance = knvas.instances.get(knvasElement);
+                if (instance && instance.fps !== undefined) {
+                    fpsValue.textContent = instance.fps;
+                }
+            }
+            requestAnimationFrame(updateFPSDisplay);
+        }
+        updateFPSDisplay();
+
+        // Update toolbox position when container moves
+        const originalUpdateLayoutToolbox = updateLayout;
+        updateLayout = function() {
+            originalUpdateLayoutToolbox();
+            updateSettingsPanelPosition();
+            updateCodeDisplayPosition();
+            updateToolboxPosition();
+        };
+
         window.addEventListener('resize', () => {
             updateSettingsPanelPosition();
             updateCodeDisplayPosition();
+            updateToolboxPosition();
         });
     </script>
 
     <script src="components/knvas.js"></script>
     <script src="components/stars.js"></script>
+    <script src="components/grid.js"></script>
 </body>
 </html>
