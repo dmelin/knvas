@@ -1,15 +1,20 @@
 class Stars extends KnvasComponent {
     constructor(container, options = {}) {
         super(container);
+        const isMobile = window.innerWidth <= 768;
+        const parsedTailSpeed = parseFloat(options.tailSpeed);
+
         this.options = {
             backgroundColor: options.backgroundColor || '#1a2332',
             middlegroundColor: options.middlegroundColor || '#00d4ff',
             foregroundColor: options.foregroundColor || '#d946ef',
             lineOpacity: parseFloat(options.lineOpacity) || 0.3,
-            starCount: options.starCount || null,
+            starCount: isMobile && options.starCountMobile ? parseInt(options.starCountMobile) : (options.starCount || null),
             mouseAttract: options.mouseAttract === 'true' || options.mouseAttract === true,
             glowAtMouse: options.glowAtMouse === 'true' || options.glowAtMouse === true,
-            tailSpeed: parseFloat(options.tailSpeed) || 0
+            tailSpeed: Number.isNaN(parsedTailSpeed) || parsedTailSpeed === 0
+                ? 1
+                : Math.min(1, Math.max(0.2, parsedTailSpeed))
         };
         this.stars = [];
         this.connectionDistance = 100;

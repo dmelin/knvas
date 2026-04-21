@@ -1,16 +1,21 @@
 class Grid extends KnvasComponent {
     constructor(container, options = {}) {
         super(container);
+        const isMobile = window.innerWidth <= 768;
+        const parsedTailSpeed = parseFloat(options.tailSpeed);
+
         this.options = {
             backgroundColor: options.backgroundColor || '#1a2332',
             middlegroundColor: options.middlegroundColor || '#00d4ff',
             foregroundColor: options.foregroundColor || '#d946ef',
             lineOpacity: parseFloat(options.lineOpacity) || 1,
-            columnCount: parseInt(options.columnCount) || 20,
-            rowCount: parseInt(options.rowCount) || 24,
+            columnCount: isMobile && options.columnCountMobile ? parseInt(options.columnCountMobile) : (parseInt(options.columnCount) || 20),
+            rowCount: isMobile && options.rowCountMobile ? parseInt(options.rowCountMobile) : (parseInt(options.rowCount) || 24),
             mouseAttract: options.mouseAttract === 'true' || options.mouseAttract === true,
             glowAtMouse: options.glowAtMouse === 'true' || options.glowAtMouse === true,
-            tailSpeed: parseFloat(options.tailSpeed) || 0,
+            tailSpeed: Number.isNaN(parsedTailSpeed) || parsedTailSpeed === 0
+                ? 1
+                : Math.min(1, Math.max(0.2, parsedTailSpeed)),
             gravityFactor: parseFloat(options.gravityFactor) || 0.3
         };
         this.dots = [];
@@ -136,8 +141,59 @@ class Grid extends KnvasComponent {
                     dot.x = dot.baseX + currentOffsetX + (targetOffsetX - currentOffsetX) * smoothing;
                     dot.y = dot.baseY + currentOffsetY + (targetOffsetY - currentOffsetY) * smoothing;
                 }
+            } else if (this.attractionActive && effectiveMouse.x !== null && effectiveMouse.y !== null) {
+                // Mouse repulsion when not attracting
+                const dx = dot.baseX - effectiveMouse.x;
+                const dy = dot.baseY - effectiveMouse.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const repelRadius = 200;
+
+                if (distance < repelRadius && distance > 0) {
+                    const force = (1 - (distance / repelRadius)) * 0.5;
+
+                    let repelX = (dx / distance) * force * dot.maxOffsetX;
+                    let repelY = (dy / distance) * force * dot.maxOffsetY;
+
+                    // Constrain based on dot type
+                    if (dot.isTopBottomEdge) {
+                        repelY = 0; // Top/bottom edges only move horizontally
+                    } else if (dot.isLeftRightEdge) {
+                        repelX = 0; // Left/right edges only move vertically
+                    }
+
+                    // Clamp to boundaries
+                    repelX = Math.max(-dot.maxOffsetX, Math.min(dot.maxOffsetX, repelX));
+                    repelY = Math.max(-dot.maxOffsetY, Math.min(dot.maxOffsetY, repelY));
+
+                    // Smooth movement
+                    const currentOffsetX = dot.x - dot.baseX;
+                    const currentOffsetY = dot.y - dot.baseY;
+                    const smoothing = 0.1;
+
+                    dot.x = dot.baseX + currentOffsetX + (repelX - currentOffsetX) * smoothing;
+                    dot.y = dot.baseY + currentOffsetY + (repelY - currentOffsetY) * smoothing;
+                } else {
+                    // Far from cursor - use random drift movement
+                    dot.x += dot.vx;
+                    dot.y += dot.vy;
+
+                    // Calculate offset from base position
+                    const offsetX = dot.x - dot.baseX;
+                    const offsetY = dot.y - dot.baseY;
+
+                    // Bounce off boundaries
+                    if (Math.abs(offsetX) >= dot.maxOffsetX) {
+                        dot.vx *= -1;
+                        dot.x = dot.baseX + Math.sign(offsetX) * dot.maxOffsetX;
+                    }
+
+                    if (Math.abs(offsetY) >= dot.maxOffsetY) {
+                        dot.vy *= -1;
+                        dot.y = dot.baseY + Math.sign(offsetY) * dot.maxOffsetY;
+                    }
+                }
             } else {
-                // No attraction - animate naturally with velocity
+                // No cursor - use random drift movement
                 dot.x += dot.vx;
                 dot.y += dot.vy;
 
@@ -160,8 +216,9 @@ class Grid extends KnvasComponent {
     }
 
     draw() {
-        // Clear canvas with transparent background
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Fill canvas with background color
+        this.ctx.fillStyle = this.options.backgroundColor;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         const cols = this.options.columnCount + 1;
         const rows = this.options.rowCount + 1;
@@ -172,7 +229,7 @@ class Grid extends KnvasComponent {
             ? this.dots.map(d => this.getWhitenessFactor(d.x, d.y, this.options.glowAtMouse, this.options.tailSpeed))
             : null;
 
-        // Draw filled cells (shapes)
+        // Draw filled cells (shapes) with 0.5 opacity
         for (let row = 0; row < this.options.rowCount; row++) {
             for (let col = 0; col < this.options.columnCount; col++) {
                 // Get the 4 corner dots of this cell
@@ -191,11 +248,11 @@ class Grid extends KnvasComponent {
                     const whiteness = (dotWhiteness[topLeftIdx] + dotWhiteness[topRightIdx] +
                                       dotWhiteness[bottomRightIdx] + dotWhiteness[bottomLeftIdx]) / 4;
                     this.ctx.fillStyle = this.brightenColor(this.options.backgroundColor, this.options.foregroundColor, whiteness);
-                    this.ctx.globalAlpha = 1;
                 } else {
                     this.ctx.fillStyle = this.options.backgroundColor;
-                    this.ctx.globalAlpha = 1;
                 }
+
+                this.ctx.globalAlpha = 0.2;
 
                 // Draw filled shape
                 this.ctx.beginPath();

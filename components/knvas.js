@@ -140,6 +140,10 @@ class KnvasComponent {
         this.mouseHistory = [];
         this.attractionActive = false;
         this.attractionTimeout = null;
+        this.temporaryCursorActive = false;
+        this.pointerMoveHandler = null;
+        this.pointerLeaveHandler = null;
+        this.pointerDownHandler = null;
         this.mouseMoveHandler = null;
         this.mouseLeaveHandler = null;
         this.clickHandler = null;
@@ -243,11 +247,53 @@ class KnvasComponent {
         this.canvas.height = rect.height;
     }
 
+    clearCursorState() {
+        this.mouse.x = null;
+        this.mouse.y = null;
+        this.mouse.inBounds = false;
+        this.lazyMouse.x = null;
+        this.lazyMouse.y = null;
+        this.mouseHistory = [];
+        this.attractionActive = false;
+        this.temporaryCursorActive = false;
+    }
+
+    clearAttractionTimeout() {
+        if (this.attractionTimeout) {
+            clearTimeout(this.attractionTimeout);
+            this.attractionTimeout = null;
+        }
+    }
+
+    activateTemporaryCursor(x, y) {
+        this.mouse.x = x;
+        this.mouse.y = y;
+        this.mouse.inBounds = false;
+        this.attractionActive = true;
+        this.temporaryCursorActive = true;
+        this.mouseHistory = [];
+
+        this.clearAttractionTimeout();
+        this.attractionTimeout = setTimeout(() => {
+            if (this.temporaryCursorActive) {
+                this.clearCursorState();
+            }
+        }, 1000);
+    }
+
     setupMouseTracking() {
-        this.mouseMoveHandler = (e) => {
+        this.pointerMoveHandler = (e) => {
+            if (e.pointerType && e.pointerType !== 'mouse') {
+                return;
+            }
+
             const rect = this.canvas.getBoundingClientRect();
             const newX = e.clientX - rect.left;
             const newY = e.clientY - rect.top;
+            const inBounds = newX >= 0 && newX <= rect.width && newY >= 0 && newY <= rect.height;
+
+            this.clearAttractionTimeout();
+            this.temporaryCursorActive = false;
 
             // Record position to history if it's far enough from the last recorded position
             if (this.mouseHistory.length === 0) {
@@ -271,32 +317,44 @@ class KnvasComponent {
 
             this.mouse.x = newX;
             this.mouse.y = newY;
-            this.mouse.inBounds = true;
+            this.mouse.inBounds = inBounds;
             this.attractionActive = true;
         };
 
-        this.mouseLeaveHandler = () => {
-            this.mouse.inBounds = false;
-            this.attractionActive = false;
-            this.mouseHistory = [];
+        this.pointerLeaveHandler = () => {
+            if (!this.temporaryCursorActive) {
+                this.clearCursorState();
+            }
         };
 
+        this.pointerDownHandler = (e) => {
+            if (e.pointerType === 'mouse') {
+                return;
+            }
+
+            const rect = this.canvas.getBoundingClientRect();
+            this.activateTemporaryCursor(
+                e.clientX - rect.left,
+                e.clientY - rect.top
+            );
+        };
+
+        if (window.PointerEvent) {
+            document.body.addEventListener('pointermove', this.pointerMoveHandler);
+            this.canvas.addEventListener('pointerleave', this.pointerLeaveHandler);
+            this.canvas.addEventListener('pointerdown', this.pointerDownHandler);
+            return;
+        }
+
+        this.mouseMoveHandler = (e) => this.pointerMoveHandler(e);
+        this.mouseLeaveHandler = () => this.pointerLeaveHandler();
         this.clickHandler = (e) => {
             if (!this.mouse.inBounds) {
                 const rect = this.canvas.getBoundingClientRect();
-                this.mouse.x = e.clientX - rect.left;
-                this.mouse.y = e.clientY - rect.top;
-                this.attractionActive = true;
-
-                if (this.attractionTimeout) {
-                    clearTimeout(this.attractionTimeout);
-                }
-
-                this.attractionTimeout = setTimeout(() => {
-                    if (!this.mouse.inBounds) {
-                        this.attractionActive = false;
-                    }
-                }, 3000);
+                this.activateTemporaryCursor(
+                    e.clientX - rect.left,
+                    e.clientY - rect.top
+                );
             }
         };
 
@@ -329,22 +387,38 @@ class KnvasComponent {
         }
 
         // Parse base color
-        let baseHex = baseColor.replace('#', '');
-        if (baseHex.length === 3) {
-            baseHex = baseHex[0] + baseHex[0] + baseHex[1] + baseHex[1] + baseHex[2] + baseHex[2];
+        let r1, g1, b1;
+        if (baseColor.startsWith('rgb')) {
+            const match = baseColor.match(/\d+/g);
+            r1 = parseInt(match[0]);
+            g1 = parseInt(match[1]);
+            b1 = parseInt(match[2]);
+        } else {
+            let baseHex = baseColor.replace('#', '');
+            if (baseHex.length === 3) {
+                baseHex = baseHex[0] + baseHex[0] + baseHex[1] + baseHex[1] + baseHex[2] + baseHex[2];
+            }
+            r1 = parseInt(baseHex.substring(0, 2), 16);
+            g1 = parseInt(baseHex.substring(2, 4), 16);
+            b1 = parseInt(baseHex.substring(4, 6), 16);
         }
-        let r1 = parseInt(baseHex.substring(0, 2), 16);
-        let g1 = parseInt(baseHex.substring(2, 4), 16);
-        let b1 = parseInt(baseHex.substring(4, 6), 16);
 
         // Parse target color
-        let targetHex = targetColor.replace('#', '');
-        if (targetHex.length === 3) {
-            targetHex = targetHex[0] + targetHex[0] + targetHex[1] + targetHex[1] + targetHex[2] + targetHex[2];
+        let r2, g2, b2;
+        if (targetColor.startsWith('rgb')) {
+            const match = targetColor.match(/\d+/g);
+            r2 = parseInt(match[0]);
+            g2 = parseInt(match[1]);
+            b2 = parseInt(match[2]);
+        } else {
+            let targetHex = targetColor.replace('#', '');
+            if (targetHex.length === 3) {
+                targetHex = targetHex[0] + targetHex[0] + targetHex[1] + targetHex[1] + targetHex[2] + targetHex[2];
+            }
+            r2 = parseInt(targetHex.substring(0, 2), 16);
+            g2 = parseInt(targetHex.substring(2, 4), 16);
+            b2 = parseInt(targetHex.substring(4, 6), 16);
         }
-        let r2 = parseInt(targetHex.substring(0, 2), 16);
-        let g2 = parseInt(targetHex.substring(2, 4), 16);
-        let b2 = parseInt(targetHex.substring(4, 6), 16);
 
         // Interpolate
         const r = Math.floor(r1 + (r2 - r1) * amount);
@@ -369,8 +443,15 @@ class KnvasComponent {
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
         }
-        if (this.attractionTimeout) {
-            clearTimeout(this.attractionTimeout);
+        this.clearAttractionTimeout();
+        if (this.pointerMoveHandler) {
+            document.body.removeEventListener('pointermove', this.pointerMoveHandler);
+        }
+        if (this.pointerLeaveHandler && this.canvas) {
+            this.canvas.removeEventListener('pointerleave', this.pointerLeaveHandler);
+        }
+        if (this.pointerDownHandler && this.canvas) {
+            this.canvas.removeEventListener('pointerdown', this.pointerDownHandler);
         }
         if (this.mouseMoveHandler) {
             document.body.removeEventListener('mousemove', this.mouseMoveHandler);
