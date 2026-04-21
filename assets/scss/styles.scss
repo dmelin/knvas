@@ -128,11 +128,24 @@ body {
     justify-content: center;
 
     &-content {
-        font-size: 40px;
-        font-style: italic;
-        color: #fff;
         position: relative;
         z-index: 1;
+        width: 60%;
+        height: 50%;
+        border-radius: 8px;
+        background: rgba(#fff, 0.1);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(#fff, 0.2);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+            width: 60%;
+            height: 60%;
+            object-fit: contain;
+        }
     }
 
     &::before {
@@ -311,7 +324,7 @@ body {
 .code-display {
     position: fixed;
     height: 130px;
-    background: #1e1e1e;
+    background: white;
     border: 2px solid #e0e0e0;
     border-radius: 4px;
     overflow-y: auto;
@@ -323,15 +336,15 @@ body {
     }
 
     &::-webkit-scrollbar-track {
-        background: #2d2d2d;
+        background: #f5f5f5;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: #555;
+        background: #ccc;
         border-radius: 2px;
 
         &:hover {
-            background: #777;
+            background: #999;
         }
     }
 }
@@ -341,11 +354,39 @@ body {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #ffffff;
+    color: #2c3e50;
     padding: 10px;
     margin: 0;
-    border-bottom: 1px solid #333;
-    background: #252526;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.copy-button {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+
+    .material-symbols-outlined {
+        font-size: 18px;
+        color: #2c3e50;
+        transition: color 2s ease;
+    }
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    &.success .material-symbols-outlined {
+        color: #22c55e;
+    }
 }
 
 .code-content {
@@ -354,11 +395,11 @@ body {
     font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
     font-size: 10px;
     line-height: 1.5;
-    color: #d4d4d4;
+    color: #2c3e50;
     white-space: pre-wrap;
     word-wrap: break-word;
 
     code {
-        color: #9cdcfe;
+        color: #2c3e50;
     }
 }

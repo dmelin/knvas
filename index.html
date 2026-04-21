@@ -53,7 +53,9 @@
     <div class="container">
         <div class="corner top-left"></div>
         <div class="corner bottom-right"></div>
-        <div class="container-content">knvas</div>
+        <div class="container-content">
+            <img src="assets/images/logo.png" alt="Knvas Logo" class="logo">
+        </div>
     </div>
 
     <div class="settings-panel" style="display: none;">
@@ -62,7 +64,12 @@
     </div>
 
     <div class="code-display" style="display: none;">
-        <h3 class="code-title">Code</h3>
+        <h3 class="code-title">
+            Code
+            <button class="copy-button" title="Copy code">
+                <span class="material-symbols-outlined">content_copy</span>
+            </button>
+        </h3>
         <pre class="code-content"><code></code></pre>
     </div>
 
@@ -394,6 +401,25 @@
             updateSettingsPanelPosition();
             updateCodeDisplayPosition();
         };
+
+        // Copy button functionality
+        const copyButton = document.querySelector('.copy-button');
+        const copyIcon = copyButton.querySelector('.material-symbols-outlined');
+        copyButton.addEventListener('click', () => {
+            const code = generateCode();
+            if (!code) return;
+
+            navigator.clipboard.writeText(code).then(() => {
+                copyButton.classList.add('success');
+                copyIcon.textContent = 'check';
+                setTimeout(() => {
+                    copyButton.classList.remove('success');
+                    copyIcon.textContent = 'content_copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        });
 
         window.addEventListener('resize', () => {
             updateSettingsPanelPosition();
