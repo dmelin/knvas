@@ -167,11 +167,16 @@ class Stars extends KnvasComponent {
     }
 
     animate() {
+        this.animationFrame = requestAnimationFrame(() => this.animate());
+
+        if (!this.shouldRenderFrame()) {
+            return;
+        }
+
         this.updateFPS();
         this.updateLazyMouse(this.options.tailSpeed);
         this.updateStars();
         this.draw();
-        this.animationFrame = requestAnimationFrame(() => this.animate());
     }
 
 }

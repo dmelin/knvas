@@ -318,11 +318,16 @@ class Grid extends KnvasComponent {
     }
 
     animate() {
+        this.animationFrame = requestAnimationFrame(() => this.animate());
+
+        if (!this.shouldRenderFrame()) {
+            return;
+        }
+
         this.updateFPS();
         this.updateLazyMouse(this.options.tailSpeed);
         this.updateDots();
         this.draw();
-        this.animationFrame = requestAnimationFrame(() => this.animate());
     }
 
 }

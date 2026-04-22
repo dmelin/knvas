@@ -128,11 +128,16 @@ class Lines extends KnvasComponent {
     }
 
     animate() {
+        this.animationFrame = requestAnimationFrame(() => this.animate());
+
+        if (!this.shouldRenderFrame()) {
+            return;
+        }
+
         this.updateFPS();
         this.updateLazyMouse(this.options.tailSpeed);
         this.updateLines();
         this.draw();
-        this.animationFrame = requestAnimationFrame(() => this.animate());
     }
 
 }

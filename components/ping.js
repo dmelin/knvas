@@ -94,6 +94,12 @@ class Ping extends KnvasComponent {
     }
 
     animate() {
+        this.animationFrame = requestAnimationFrame(() => this.animate());
+
+        if (!this.shouldRenderFrame()) {
+            return;
+        }
+
         this.updateFPS();
         this.updateLazyMouse(this.options.tailSpeed);
 
@@ -101,7 +107,6 @@ class Ping extends KnvasComponent {
         this.updatePings(deltaTime);
 
         this.draw();
-        this.animationFrame = requestAnimationFrame(() => this.animate());
     }
 
 }

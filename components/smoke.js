@@ -258,11 +258,16 @@ class Smoke extends KnvasComponent {
     }
 
     animate() {
+        this.animationFrame = requestAnimationFrame(() => this.animate());
+
+        if (!this.shouldRenderFrame()) {
+            return;
+        }
+
         this.updateFPS();
         this.updateLazyMouse(this.options.tailSpeed);
         this._updateParticles();
         this.draw();
-        this.animationFrame = requestAnimationFrame(() => this.animate());
     }
 
     // Borrowed from original — kept identical

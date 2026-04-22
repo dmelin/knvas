@@ -9,6 +9,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <style>
+        /* Override Prism defaults to match original styling */
+        .code-content,
+        .code-content code,
+        .code-content code[class*="language-"],
+        .code-content pre[class*="language-"] {
+            font-size: 10px !important;
+            background: transparent !important;
+            text-shadow: none !important;
+        }
+    </style>
 </head>
 <body>
     <button class="hamburger-menu" aria-label="Toggle menu">
@@ -109,7 +121,7 @@
                 <span class="material-symbols-outlined">content_copy</span>
             </button>
         </h3>
-        <pre class="code-content"><code></code></pre>
+        <pre class="code-content"><code class="language-html"></code></pre>
     </div>
 
     <div class="info-modal-overlay" aria-hidden="true">
@@ -1349,6 +1361,7 @@
             const code = generateCode();
             if (code) {
                 codeContent.textContent = code;
+                Prism.highlightElement(codeContent);
                 codeDisplay.style.display = 'block';
                 updateCodeDisplayPosition();
             } else {
@@ -1514,5 +1527,7 @@
     </script>
 
     <script src="components/knvas.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
 </body>
 </html>

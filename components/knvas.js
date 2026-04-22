@@ -14,6 +14,10 @@ class KnvasManager {
         this.components[type] = ComponentClass;
     }
 
+    getInstance(element) {
+        return this.instances.get(element);
+    }
+
     observeDOM() {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -203,6 +207,14 @@ class KnvasComponent {
         this.fps = 0;
         this.frameCount = 0;
         this.lastFpsUpdate = performance.now();
+
+        // FPS capping
+        this.targetFps = 60;
+        this.targetFpsOutOfView = 30;
+        this.fpsInterval = 1000 / this.targetFps;
+        this.lastFrameTime = performance.now();
+        this.isInView = true;
+        this.visibilityObserver = null;
     }
 
     updateFPS() {
@@ -216,6 +228,35 @@ class KnvasComponent {
             this.frameCount = 0;
             this.lastFpsUpdate = now;
         }
+    }
+
+    setupVisibilityObserver() {
+        if (!this.canvas) return;
+
+        this.visibilityObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                this.isInView = entry.isIntersecting;
+                // Update FPS interval based on visibility
+                const targetFps = this.isInView ? this.targetFps : this.targetFpsOutOfView;
+                this.fpsInterval = 1000 / targetFps;
+            });
+        }, {
+            threshold: 0.1 // Consider in view if at least 10% is visible
+        });
+
+        this.visibilityObserver.observe(this.canvas);
+    }
+
+    shouldRenderFrame() {
+        const now = performance.now();
+        const elapsed = now - this.lastFrameTime;
+
+        if (elapsed >= this.fpsInterval) {
+            this.lastFrameTime = now - (elapsed % this.fpsInterval);
+            return true;
+        }
+
+        return false;
     }
 
     updateLazyMouse(tailSpeed) {
@@ -290,6 +331,7 @@ class KnvasComponent {
         this.canvas.style.borderRadius = 'inherit';
         this.container.appendChild(this.canvas);
         this.ctx = this.canvas.getContext('2d');
+        this.setupVisibilityObserver();
     }
 
     setupCanvas() {
@@ -334,17 +376,16 @@ class KnvasComponent {
 
     setupMouseTracking() {
         this.pointerMoveHandler = (e) => {
-            if (e.pointerType && e.pointerType !== 'mouse') {
-                return;
-            }
-
             const rect = this.canvas.getBoundingClientRect();
             const newX = e.clientX - rect.left;
             const newY = e.clientY - rect.top;
             const inBounds = newX >= 0 && newX <= rect.width && newY >= 0 && newY <= rect.height;
 
-            this.clearAttractionTimeout();
-            this.temporaryCursorActive = false;
+            // Only clear temporary cursor for actual mouse movement, not touch/pen
+            if (!e.pointerType || e.pointerType === 'mouse') {
+                this.clearAttractionTimeout();
+                this.temporaryCursorActive = false;
+            }
 
             // Record position to history if it's far enough from the last recorded position
             if (this.mouseHistory.length === 0) {
@@ -379,7 +420,9 @@ class KnvasComponent {
         };
 
         this.pointerDownHandler = (e) => {
-            if (e.pointerType === 'mouse') {
+            // Skip if it's a mouse click on desktop (desktop has continuous mousemove)
+            // But process touch/pen events or any click
+            if (e.pointerType === 'mouse' && e.type === 'pointerdown') {
                 return;
             }
 
@@ -390,28 +433,41 @@ class KnvasComponent {
             );
         };
 
-        if (window.PointerEvent) {
-            document.body.addEventListener('pointermove', this.pointerMoveHandler);
-            this.canvas.addEventListener('pointerleave', this.pointerLeaveHandler);
-            this.canvas.addEventListener('pointerdown', this.pointerDownHandler);
-            return;
-        }
+        // Touch event handlers for mobile
+        this.touchHandler = (e) => {
+            if (e.touches && e.touches.length > 0) {
+                const touch = e.touches[0];
+                const rect = this.canvas.getBoundingClientRect();
+                this.activateTemporaryCursor(
+                    touch.clientX - rect.left,
+                    touch.clientY - rect.top
+                );
+            }
+        };
 
-        this.mouseMoveHandler = (e) => this.pointerMoveHandler(e);
-        this.mouseLeaveHandler = () => this.pointerLeaveHandler();
-        this.clickHandler = (e) => {
-            if (!this.mouse.inBounds) {
+        if (window.PointerEvent) {
+            document.addEventListener('pointermove', this.pointerMoveHandler, true);
+            this.canvas.addEventListener('pointerleave', this.pointerLeaveHandler);
+            document.addEventListener('pointerdown', this.pointerDownHandler, true);
+        } else {
+            this.mouseMoveHandler = (e) => this.pointerMoveHandler(e);
+            this.mouseLeaveHandler = () => this.pointerLeaveHandler();
+            this.clickHandler = (e) => {
                 const rect = this.canvas.getBoundingClientRect();
                 this.activateTemporaryCursor(
                     e.clientX - rect.left,
                     e.clientY - rect.top
                 );
-            }
-        };
+            };
 
-        document.body.addEventListener('mousemove', this.mouseMoveHandler);
-        this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler);
-        this.canvas.addEventListener('click', this.clickHandler);
+            document.addEventListener('mousemove', this.mouseMoveHandler, true);
+            this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler);
+            document.addEventListener('click', this.clickHandler, true);
+
+            // Add touch events only if PointerEvent not supported
+            document.addEventListener('touchstart', this.touchHandler, true);
+            document.addEventListener('touchmove', this.touchHandler, true);
+        }
     }
 
     getWhitenessFactor(x, y, glowEnabled, tailSpeed = 0) {
@@ -491,27 +547,34 @@ class KnvasComponent {
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
         }
+        if (this.visibilityObserver) {
+            this.visibilityObserver.disconnect();
+        }
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
         }
         this.clearAttractionTimeout();
         if (this.pointerMoveHandler) {
-            document.body.removeEventListener('pointermove', this.pointerMoveHandler);
+            document.removeEventListener('pointermove', this.pointerMoveHandler, true);
         }
         if (this.pointerLeaveHandler && this.canvas) {
             this.canvas.removeEventListener('pointerleave', this.pointerLeaveHandler);
         }
-        if (this.pointerDownHandler && this.canvas) {
-            this.canvas.removeEventListener('pointerdown', this.pointerDownHandler);
+        if (this.pointerDownHandler) {
+            document.removeEventListener('pointerdown', this.pointerDownHandler, true);
         }
         if (this.mouseMoveHandler) {
-            document.body.removeEventListener('mousemove', this.mouseMoveHandler);
+            document.removeEventListener('mousemove', this.mouseMoveHandler, true);
         }
         if (this.mouseLeaveHandler && this.canvas) {
             this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler);
         }
-        if (this.clickHandler && this.canvas) {
-            this.canvas.removeEventListener('click', this.clickHandler);
+        if (this.clickHandler) {
+            document.removeEventListener('click', this.clickHandler, true);
+        }
+        if (this.touchHandler) {
+            document.removeEventListener('touchstart', this.touchHandler, true);
+            document.removeEventListener('touchmove', this.touchHandler, true);
         }
         if (this.canvas) {
             this.canvas.remove();
@@ -523,3 +586,4 @@ class KnvasComponent {
 }
 
 const knvas = new KnvasManager();
+window.knvas = knvas;
