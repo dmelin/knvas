@@ -2,7 +2,6 @@ class KnvasManager {
     constructor() {
         this.components = {};
         this.instances = new WeakMap();
-        this.init();
     }
 
     init() {
@@ -55,25 +54,8 @@ class KnvasManager {
         const type = element.getAttribute('type');
         if (!type) return;
 
-        // Create a wrapper container to isolate the canvas
-        const wrapper = document.createElement('div');
-        wrapper.className = 'knvas-wrapper';
-        wrapper.style.cssText = 'position: relative; width: 100%; height: 100%; display: block;';
-
-        // Copy any inline styles from the knvas element to the wrapper
-        if (element.style.cssText) {
-            wrapper.style.cssText += element.style.cssText;
-        }
-
-        // Replace the knvas element with the wrapper
-        element.parentElement.replaceChild(wrapper, element);
-
-        // Keep the knvas element inside the wrapper (hidden) for reference
-        element.style.display = 'none';
-        wrapper.appendChild(element);
-
-        // Clear any previous errors
-        wrapper.querySelectorAll('.knvas-error').forEach(err => err.remove());
+        const container = element.parentElement;
+        if (!container) return;
 
         let ComponentClass = this.components[type];
 
@@ -83,24 +65,24 @@ class KnvasManager {
                 await this.loadComponent(type);
                 ComponentClass = this.components[type];
             } catch (error) {
-                this.renderError(wrapper, `Failed to load component "${type}": ${error.message}`);
+                console.error(`Failed to load component "${type}": ${error.message}`);
                 return;
             }
         }
 
         if (!ComponentClass) {
-            this.renderError(wrapper, `Knvas component type "${type}" not registered`);
+            console.error(`Knvas component type "${type}" not registered`);
             return;
         }
 
         const options = this.parseOptions(element);
 
         try {
-            const instance = new ComponentClass(wrapper, options);
+            const instance = new ComponentClass(container, options);
             instance.init();
             this.instances.set(element, instance);
         } catch (error) {
-            this.renderError(wrapper, error.message);
+            console.error(error.message);
         }
     }
 
@@ -182,15 +164,6 @@ class KnvasManager {
         if (instance && instance.destroy) {
             instance.destroy();
             this.instances.delete(element);
-        }
-
-        // Remove the wrapper if it exists
-        const wrapper = element.parentElement;
-        if (wrapper && wrapper.className === 'knvas-wrapper') {
-            wrapper.remove();
-        } else if (element.parentElement) {
-            // Clean up any error messages if no wrapper
-            element.parentElement.querySelectorAll('.knvas-error').forEach(err => err.remove());
         }
     }
 }

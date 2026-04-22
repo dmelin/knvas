@@ -859,3 +859,24 @@ body {
         }
     }
 }
+
+// Prism syntax highlighting overrides
+.code-content {
+    font-size: 10px;
+}
+
+.code-content {
+    font-size: 10px;
+
+    .token.tag { color: #e06c75; }
+    .token.attr-name { color: #d19a66; }
+    .token.attr-value { color: #98c379; }
+    .token.punctuation { color: #abb2bf; }
+    .token.string { color: #98c379; }
+}
+
+.knvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}

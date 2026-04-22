@@ -1,0 +1,1216 @@
+window.app = {
+    async init() {
+        const container = document.querySelector('.container');
+        const containerContent = document.querySelector('.container-content');
+        const MOBILE_BREAKPOINT = 768;
+
+        let bounds = {
+            left: window.innerWidth * 0.25,
+            top: window.innerHeight * 0.20,
+            right: window.innerWidth * 0.75,
+            bottom: window.innerHeight * 0.80
+        };
+        let viewportSize = {
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
+
+        function resizeBoundsToViewport() {
+            const nextWidth = window.innerWidth;
+            const nextHeight = window.innerHeight;
+            const previousWidth = Math.max(viewportSize.width, 1);
+            const previousHeight = Math.max(viewportSize.height, 1);
+            const minSize = 150;
+
+            const leftRatio = bounds.left / previousWidth;
+            const topRatio = bounds.top / previousHeight;
+            const widthRatio = (bounds.right - bounds.left) / previousWidth;
+            const heightRatio = (bounds.bottom - bounds.top) / previousHeight;
+
+            const width = Math.max(minSize, Math.min(nextWidth, nextWidth * widthRatio));
+            const height = Math.max(minSize, Math.min(nextHeight, nextHeight * heightRatio));
+
+            bounds.left = Math.min(Math.max(0, nextWidth * leftRatio), Math.max(nextWidth - width, 0));
+            bounds.top = Math.min(Math.max(0, nextHeight * topRatio), Math.max(nextHeight - height, 0));
+            bounds.right = bounds.left + width;
+            bounds.bottom = bounds.top + height;
+
+            viewportSize.width = nextWidth;
+            viewportSize.height = nextHeight;
+        }
+
+        function positionContainerContent() {
+            if (window.innerWidth <= MOBILE_BREAKPOINT) {
+                const mobileHeaderHeight = 60;
+                const splitHeight = (window.innerHeight - mobileHeaderHeight) / 2;
+
+                containerContent.style.left = (window.innerWidth / 2) + 'px';
+                containerContent.style.top = (mobileHeaderHeight + (splitHeight / 2)) + 'px';
+                return;
+            }
+
+            containerContent.style.left = (bounds.left + ((bounds.right - bounds.left) / 2)) + 'px';
+            containerContent.style.top = (bounds.top + ((bounds.bottom - bounds.top) / 2)) + 'px';
+        }
+
+        function normalizeTailSpeedValue(value) {
+            const parsed = parseFloat(value);
+
+            if (Number.isNaN(parsed) || parsed === 0) {
+                return 1;
+            }
+
+            return Math.min(1, Math.max(0.2, parsed));
+        }
+
+        function updateLayout() {
+            container.style.left = bounds.left + 'px';
+            container.style.top = bounds.top + 'px';
+            container.style.width = (bounds.right - bounds.left) + 'px';
+            container.style.height = (bounds.bottom - bounds.top) + 'px';
+            positionContainerContent();
+        }
+
+        window.addEventListener('resize', () => {
+            resizeBoundsToViewport();
+            updateLayout();
+        });
+
+        updateLayout();
+
+        // Theme definitions
+        const themes = {
+            stars: {
+                icon: 'star',
+                presets: {
+                    'Knvas': {
+                        backgroundColor: '#1a2332',
+                        middlegroundColor: '#00d4ff',
+                        foregroundColor: '#d946ef',
+                        lineOpacity: '0.3',
+                        starCount: '400',
+                        starCountMobile: '150',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1'
+                    },
+                    'Neon': {
+                        backgroundColor: '#0d0221',
+                        middlegroundColor: '#ff006e',
+                        foregroundColor: '#00d4ff',
+                        lineOpacity: '0.5',
+                        starCount: '400',
+                        starCountMobile: '150',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1'
+                    },
+                    'Notepad': {
+                        backgroundColor: '#f0f0f0',
+                        middlegroundColor: '#c0c0c0',
+                        foregroundColor: '#ffffff',
+                        lineOpacity: '0.3',
+                        starCount: '400',
+                        starCountMobile: '150',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1'
+                    },
+                    'Matrix': {
+                        backgroundColor: '#0a0f0a',
+                        middlegroundColor: '#00ff00',
+                        foregroundColor: '#7fff00',
+                        lineOpacity: '0.4',
+                        starCount: '400',
+                        starCountMobile: '150',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'false',
+                        tailSpeed: '1'
+                    },
+                    'Pastels': {
+                        backgroundColor: '#fef6e4',
+                        middlegroundColor: '#dda0a0',
+                        foregroundColor: '#c8b6ff',
+                        lineOpacity: '0.3',
+                        starCount: '400',
+                        starCountMobile: '150',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '0.5'
+                    },
+                    'Ketchup and Mustard': {
+                        backgroundColor: '#8b0000',
+                        middlegroundColor: '#e8a020',
+                        foregroundColor: '#ff8c00',
+                        lineOpacity: '0.4',
+                        starCount: '400',
+                        starCountMobile: '150',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1'
+                    }
+                }
+            },
+            grid: {
+                icon: 'grid_on',
+                presets: {
+                    'Knvas': {
+                        backgroundColor: '#1a2332',
+                        middlegroundColor: '#00d4ff',
+                        foregroundColor: '#d946ef',
+                        lineOpacity: '1',
+                        columnCount: '20',
+                        rowCount: '24',
+                        columnCountMobile: '8',
+                        rowCountMobile: '10',
+                        mouseAttract: 'false',
+                        glowAtMouse: 'false',
+                        tailSpeed: '1',
+                        gravityFactor: '0.3'
+                    },
+                    'Neon': {
+                        backgroundColor: '#0d0221',
+                        middlegroundColor: '#ff006e',
+                        foregroundColor: '#00d4ff',
+                        lineOpacity: '1',
+                        columnCount: '20',
+                        rowCount: '24',
+                        columnCountMobile: '8',
+                        rowCountMobile: '10',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        gravityFactor: '0.3'
+                    },
+                    'Notepad': {
+                        backgroundColor: '#f0f0f0',
+                        middlegroundColor: '#c0c0c0',
+                        foregroundColor: '#ffffff',
+                        lineOpacity: '1',
+                        columnCount: '20',
+                        rowCount: '24',
+                        columnCountMobile: '8',
+                        rowCountMobile: '10',
+                        mouseAttract: 'false',
+                        glowAtMouse: 'false',
+                        tailSpeed: '1',
+                        gravityFactor: '0.3'
+                    },
+                    'Matrix': {
+                        backgroundColor: '#0a0f0a',
+                        middlegroundColor: '#00ff00',
+                        foregroundColor: '#7fff00',
+                        lineOpacity: '1',
+                        columnCount: '20',
+                        rowCount: '24',
+                        columnCountMobile: '8',
+                        rowCountMobile: '10',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'false',
+                        tailSpeed: '1',
+                        gravityFactor: '0.3'
+                    },
+                    'Pastels': {
+                        backgroundColor: '#fef6e4',
+                        middlegroundColor: '#dda0a0',
+                        foregroundColor: '#c8b6ff',
+                        lineOpacity: '1',
+                        columnCount: '20',
+                        rowCount: '24',
+                        columnCountMobile: '8',
+                        rowCountMobile: '10',
+                        mouseAttract: 'false',
+                        glowAtMouse: 'false',
+                        tailSpeed: '0.5',
+                        gravityFactor: '0.3'
+                    },
+                    'Ketchup and Mustard': {
+                        backgroundColor: '#8b0000',
+                        middlegroundColor: '#e8a020',
+                        foregroundColor: '#ff8c00',
+                        lineOpacity: '1',
+                        columnCount: '20',
+                        rowCount: '24',
+                        columnCountMobile: '8',
+                        rowCountMobile: '10',
+                        mouseAttract: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        gravityFactor: '0.3'
+                    }
+                }
+            },
+            smoke: {
+                icon: 'blur_on',
+                presets: {
+                    'Knvas': {
+                        backgroundColor: '#1a2332',
+                        middlegroundColor: '#00d4ff',
+                        foregroundColor: '#d946ef',
+                        particleOpacity: '0.6',
+                        particleCount: '12',
+                        particleCountMobile: '8',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Neon': {
+                        backgroundColor: '#0d0221',
+                        middlegroundColor: '#ff006e',
+                        foregroundColor: '#00d4ff',
+                        particleOpacity: '0.6',
+                        particleCount: '12',
+                        particleCountMobile: '8',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Notepad': {
+                        backgroundColor: '#f0f0f0',
+                        middlegroundColor: '#c0c0c0',
+                        foregroundColor: '#ffffff',
+                        particleOpacity: '0.6',
+                        particleCount: '12',
+                        particleCountMobile: '8',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Matrix': {
+                        backgroundColor: '#0a0f0a',
+                        middlegroundColor: '#00ff00',
+                        foregroundColor: '#7fff00',
+                        particleOpacity: '0.6',
+                        particleCount: '12',
+                        particleCountMobile: '8',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'false',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Pastels': {
+                        backgroundColor: '#fef6e4',
+                        middlegroundColor: '#dda0a0',
+                        foregroundColor: '#c8b6ff',
+                        particleOpacity: '0.6',
+                        particleCount: '12',
+                        particleCountMobile: '8',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '0.5',
+                        repelStrength: '0.5'
+                    },
+                    'Ketchup and Mustard': {
+                        backgroundColor: '#8b0000',
+                        middlegroundColor: '#e8a020',
+                        foregroundColor: '#ff8c00',
+                        particleOpacity: '0.6',
+                        particleCount: '12',
+                        particleCountMobile: '8',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    }
+                }
+            },
+            blobs: {
+                icon: 'bubble_chart',
+                presets: {
+                    'Knvas': {
+                        backgroundColor: '#1a2332',
+                        foregroundColor: '#00d4ff',
+                        blobCount: '30',
+                        blobCountMobile: '20',
+                        maxRadius: '80',
+                        influenceRadius: '300',
+                        tailSpeed: '1'
+                    },
+                    'Neon': {
+                        backgroundColor: '#0d0221',
+                        foregroundColor: '#ff006e',
+                        blobCount: '30',
+                        blobCountMobile: '20',
+                        maxRadius: '80',
+                        influenceRadius: '300',
+                        tailSpeed: '1'
+                    },
+                    'Notepad': {
+                        backgroundColor: '#f0f0f0',
+                        foregroundColor: '#c0c0c0',
+                        blobCount: '30',
+                        blobCountMobile: '20',
+                        maxRadius: '80',
+                        influenceRadius: '300',
+                        tailSpeed: '1'
+                    },
+                    'Matrix': {
+                        backgroundColor: '#0a0f0a',
+                        foregroundColor: '#00ff00',
+                        blobCount: '30',
+                        blobCountMobile: '20',
+                        maxRadius: '80',
+                        influenceRadius: '300',
+                        tailSpeed: '1'
+                    },
+                    'Pastels': {
+                        backgroundColor: '#fef6e4',
+                        foregroundColor: '#dda0a0',
+                        blobCount: '30',
+                        blobCountMobile: '20',
+                        maxRadius: '80',
+                        influenceRadius: '300',
+                        tailSpeed: '0.5'
+                    },
+                    'Ketchup and Mustard': {
+                        backgroundColor: '#8b0000',
+                        foregroundColor: '#e8a020',
+                        blobCount: '30',
+                        blobCountMobile: '20',
+                        maxRadius: '80',
+                        influenceRadius: '300',
+                        tailSpeed: '1'
+                    }
+                }
+            },
+            lines: {
+                icon: 'view_column',
+                presets: {
+                    'Knvas': {
+                        backgroundColor: '#1a2332',
+                        middlegroundColor: '#00d4ff',
+                        foregroundColor: '#d946ef',
+                        lineCount: '50',
+                        lineCountMobile: '30',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Neon': {
+                        backgroundColor: '#0d0221',
+                        middlegroundColor: '#ff006e',
+                        foregroundColor: '#00d4ff',
+                        lineCount: '50',
+                        lineCountMobile: '30',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Notepad': {
+                        backgroundColor: '#f0f0f0',
+                        middlegroundColor: '#c0c0c0',
+                        foregroundColor: '#ffffff',
+                        lineCount: '50',
+                        lineCountMobile: '30',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Matrix': {
+                        backgroundColor: '#0a0f0a',
+                        middlegroundColor: '#00ff00',
+                        foregroundColor: '#7fff00',
+                        lineCount: '50',
+                        lineCountMobile: '30',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'false',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    },
+                    'Pastels': {
+                        backgroundColor: '#fef6e4',
+                        middlegroundColor: '#dda0a0',
+                        foregroundColor: '#c8b6ff',
+                        lineCount: '50',
+                        lineCountMobile: '30',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '0.5',
+                        repelStrength: '0.5'
+                    },
+                    'Ketchup and Mustard': {
+                        backgroundColor: '#8b0000',
+                        middlegroundColor: '#e8a020',
+                        foregroundColor: '#ff8c00',
+                        lineCount: '50',
+                        lineCountMobile: '30',
+                        mouseRepel: 'true',
+                        glowAtMouse: 'true',
+                        tailSpeed: '1',
+                        repelStrength: '0.5'
+                    }
+                }
+            },
+            ping: {
+                icon: 'radio_button_unchecked',
+                presets: {
+                    'Knvas': {
+                        backgroundColor: '#1a2332',
+                        middlegroundColor: '#00d4ff',
+                        foregroundColor: '#d946ef',
+                        pingFreequency: '0.5',
+                        growSpeed: '1',
+                        tailSpeed: '1'
+                    },
+                    'Neon': {
+                        backgroundColor: '#0d0221',
+                        middlegroundColor: '#ff006e',
+                        foregroundColor: '#00d4ff',
+                        pingFrequency: '0.5',
+                        growSpeed: '1',
+                        tailSpeed: '1'
+                    },
+                    'Notepad': {
+                        backgroundColor: '#f0f0f0',
+                        middlegroundColor: '#c0c0c0',
+                        foregroundColor: '#ffffff',
+                        pingFrequency: '0.5',
+                        growSpeed: '1',
+                        tailSpeed: '1'
+                    },
+                    'Matrix': {
+                        backgroundColor: '#0a0f0a',
+                        middlegroundColor: '#00ff00',
+                        foregroundColor: '#7fff00',
+                        pingFrequency: '0.5',
+                        growSpeed: '1',
+                        tailSpeed: '1'
+                    },
+                    'Pastels': {
+                        backgroundColor: '#fef6e4',
+                        middlegroundColor: '#dda0a0',
+                        foregroundColor: '#c8b6ff',
+                        pingFrequency: '0.5',
+                        growSpeed: '1',
+                        tailSpeed: '0.5'
+                    },
+                    'Ketchup and Mustard': {
+                        backgroundColor: '#8b0000',
+                        middlegroundColor: '#e8a020',
+                        foregroundColor: '#ff8c00',
+                        pingFrequency: '0.5',
+                        growSpeed: '1',
+                        tailSpeed: '1'
+                    }
+                }
+            }
+        };
+
+        // Populate canvas menu dynamically
+        const canvasMenuSection = document.querySelector('#canvas-menu-section');
+        Object.keys(themes).forEach(type => {
+            const a = document.createElement('a');
+            a.href = '#';
+            a.className = 'menu-item';
+            a.dataset.canvasType = type;
+
+            const icon = document.createElement('span');
+            icon.className = 'material-symbols-outlined';
+            icon.textContent = themes[type].icon;
+
+            const text = document.createElement('span');
+            text.className = 'menu-text';
+            text.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+
+            a.appendChild(icon);
+            a.appendChild(text);
+            canvasMenuSection.appendChild(a);
+        });
+
+        // Helper function to get active knvas element
+        function getKnvasElement() {
+            return document.querySelector('knvas');
+        }
+
+        // Settings panel management
+        const settingsPanel = document.querySelector('.settings-panel');
+        const settingsContent = document.querySelector('.settings-content');
+        const mobilePanelTabs = document.querySelector('.mobile-panel-tabs');
+        const mobilePanelTabButtons = Array.from(document.querySelectorAll('.mobile-panel-tab'));
+        const allMenuItems = Array.from(document.querySelectorAll('.menu-item'));
+        const canvasMenuItems = Array.from(document.querySelectorAll('.menu-item[data-canvas-type]'));
+        const modalMenuItems = Array.from(document.querySelectorAll('.menu-item[data-modal]'));
+        const infoModalOverlay = document.querySelector('.info-modal-overlay');
+        const infoModalTitle = document.querySelector('.info-modal-title');
+        const infoModalBody = document.querySelector('.info-modal-body');
+        const infoModalClose = document.querySelector('.info-modal-close');
+        const modalContent = {
+            how: {
+                title: 'How to use',
+                paragraphs: [
+                    'Choose a canvas from the left menu to load a live visual into the preview area.',
+                    'Adjust the settings panel to tune colors, counts, motion, and interaction, then switch to the code panel to copy the generated markup.',
+                    'On mobile, the lower half of the screen switches between settings and code so you can edit and inspect without losing the canvas preview.'
+                ]
+            },
+            about: {
+                title: 'About',
+                paragraphs: [
+                    'Knvas is a small playground for interactive canvas backgrounds and motion studies.',
+                    'It is built to let you explore visual presets quickly, tweak parameters in real time, and export the result as simple declarative markup.',
+                    'The goal is speed: pick a visual, tune it, and drop it into a project without a heavy setup.'
+                ]
+            },
+            contact: {
+                title: 'Contact',
+                paragraphs: [
+                    'If you want to share feedback, report an issue, or talk about collaborations, reach out directly.',
+                    'The easiest route is through Daniel Melin and the project links connected to this site.',
+                    'If the work is useful, the Buy me a coffee link in the menu is also a simple way to show support.'
+                ]
+            }
+        };
+
+        function openInfoModal(modalKey) {
+            const modal = modalContent[modalKey];
+            if (!modal) return;
+
+            infoModalTitle.textContent = modal.title;
+            infoModalBody.innerHTML = '';
+
+            modal.paragraphs.forEach(text => {
+                const paragraph = document.createElement('p');
+                paragraph.textContent = text;
+                infoModalBody.appendChild(paragraph);
+            });
+
+            infoModalOverlay.classList.add('is-open');
+            infoModalOverlay.setAttribute('aria-hidden', 'false');
+
+            if (window.innerWidth <= 768) {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.remove('open');
+            }
+        }
+
+        function closeInfoModal() {
+            infoModalOverlay.classList.remove('is-open');
+            infoModalOverlay.setAttribute('aria-hidden', 'true');
+        }
+
+        function setActiveCanvasMenu(type) {
+            canvasMenuItems.forEach(item => {
+                item.classList.toggle('is-active', item.dataset.canvasType === type);
+            });
+        }
+
+        async function loadCanvasType(type) {
+            if (!type) return;
+
+            // Destroy existing knvas instances
+            document.querySelectorAll('knvas').forEach(el => {
+                knvas.destroyElement(el);
+            });
+
+            // Remove the wrapper from DOM
+            document.querySelectorAll('.knvas-wrapper').forEach(el => el.remove());
+
+            // Create knvas element with options from theme
+            const knvasElement = document.createElement('knvas');
+            knvasElement.setAttribute('type', type);
+
+            // Add options from the default Knvas preset
+            const defaultPreset = themes[type]?.presets?.['Knvas'];
+            if (defaultPreset) {
+                Object.entries(defaultPreset).forEach(([name, value]) => {
+                    const option = document.createElement('option');
+                    option.setAttribute('name', name);
+                    option.setAttribute('value', value);
+                    knvasElement.appendChild(option);
+                });
+            }
+
+            // Create wrapper and add knvas element inside it
+            const wrapper = document.createElement('div');
+            wrapper.className = 'knvas-wrapper';
+            wrapper.appendChild(knvasElement);
+            container.appendChild(wrapper);
+
+            populateSettings(type);
+            setActiveCanvasMenu(type);
+
+            // Close sidebar on mobile after selecting a component
+            if (window.innerWidth <= 768) {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.remove('open');
+            }
+        }
+
+        // Menu handlers
+        allMenuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                closeInfoModal();
+            });
+        });
+
+        canvasMenuItems.forEach(item => {
+            item.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await loadCanvasType(item.dataset.canvasType);
+            });
+        });
+
+        modalMenuItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                openInfoModal(item.dataset.modal);
+            });
+        });
+
+        infoModalClose.addEventListener('click', closeInfoModal);
+        infoModalOverlay.addEventListener('click', (e) => {
+            if (e.target === infoModalOverlay) {
+                closeInfoModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && infoModalOverlay.classList.contains('is-open')) {
+                closeInfoModal();
+            }
+        });
+
+        // Component settings definitions
+        const componentSettings = {
+            stars: [
+                {name: 'backgroundColor', type: 'color', label: 'Background'},
+                {name: 'middlegroundColor', type: 'color', label: 'Star Color'},
+                {name: 'foregroundColor', type: 'color', label: 'Glow Color'},
+                {name: 'lineOpacity', type: 'range', label: 'Line Opacity', min: 0, max: 1, step: 0.05},
+                {name: 'starCount', type: 'range', label: 'Star Count', min: 10, max: 1000, step: 10},
+                {name: 'starCountMobile', type: 'range', label: 'Star Count Mobile', min: 10, max: 500, step: 10},
+                {name: 'mouseAttract', type: 'checkbox', label: 'Mouse Attract'},
+                {name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse'},
+                {name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1}
+            ],
+            grid: [
+                {name: 'backgroundColor', type: 'color', label: 'Background'},
+                {name: 'middlegroundColor', type: 'color', label: 'Line Color'},
+                {name: 'foregroundColor', type: 'color', label: 'Glow Color'},
+                {name: 'lineOpacity', type: 'range', label: 'Line Opacity', min: 0, max: 1, step: 0.05},
+                {name: 'columnCount', type: 'range', label: 'Columns', min: 1, max: 30, step: 1},
+                {name: 'rowCount', type: 'range', label: 'Rows', min: 1, max: 30, step: 1},
+                {name: 'columnCountMobile', type: 'range', label: 'Columns Mobile', min: 1, max: 20, step: 1},
+                {name: 'rowCountMobile', type: 'range', label: 'Rows Mobile', min: 1, max: 20, step: 1},
+                {name: 'mouseAttract', type: 'checkbox', label: 'Mouse Attract'},
+                {name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse'},
+                {name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1},
+                {name: 'gravityFactor', type: 'range', label: 'Gravity', min: 0, max: 1, step: 0.05}
+            ],
+            smoke: [
+                {name: 'backgroundColor', type: 'color', label: 'Background'},
+                {name: 'middlegroundColor', type: 'color', label: 'Smoke Color'},
+                {name: 'foregroundColor', type: 'color', label: 'Glow Color'},
+                {name: 'particleOpacity', type: 'range', label: 'Opacity', min: 0, max: 1, step: 0.05},
+                {name: 'particleCount', type: 'range', label: 'Stripe Count', min: 1, max: 30, step: 1},
+                {name: 'particleCountMobile', type: 'range', label: 'Stripe Count Mobile', min: 1, max: 20, step: 1},
+                {name: 'mouseRepel', type: 'checkbox', label: 'Mouse Repel'},
+                {name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse'},
+                {name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1},
+                {name: 'repelStrength', type: 'range', label: 'Repel Strength', min: 0, max: 1, step: 0.05}
+            ],
+            blobs: [
+                {name: 'backgroundColor', type: 'color', label: 'Background'},
+                {name: 'foregroundColor', type: 'color', label: 'Blob Color'},
+                {name: 'blobCount', type: 'range', label: 'Blob Count', min: 10, max: 100, step: 5},
+                {name: 'blobCountMobile', type: 'range', label: 'Blob Count Mobile', min: 10, max: 60, step: 5},
+                {name: 'maxRadius', type: 'range', label: 'Max Radius', min: 20, max: 150, step: 5},
+                {name: 'influenceRadius', type: 'range', label: 'Influence Radius', min: 100, max: 500, step: 10},
+                {name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1}
+            ],
+            lines: [
+                {name: 'backgroundColor', type: 'color', label: 'Background'},
+                {name: 'middlegroundColor', type: 'color', label: 'Line Color'},
+                {name: 'foregroundColor', type: 'color', label: 'Glow Color'},
+                {name: 'lineCount', type: 'range', label: 'Line Count', min: 10, max: 100, step: 5},
+                {name: 'lineCountMobile', type: 'range', label: 'Line Count Mobile', min: 10, max: 60, step: 5},
+                {name: 'mouseRepel', type: 'checkbox', label: 'Mouse Repel'},
+                {name: 'glowAtMouse', type: 'checkbox', label: 'Glow at Mouse'},
+                {name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1},
+                {name: 'repelStrength', type: 'range', label: 'Repel Strength', min: 0, max: 1, step: 0.05}
+            ],
+            ping: [
+                {name: 'backgroundColor', type: 'color', label: 'Background'},
+                {name: 'middlegroundColor', type: 'color', label: 'Ping Color'},
+                {name: 'foregroundColor', type: 'color', label: 'Accent Color'},
+                {name: 'pingFrequency', type: 'range', label: 'Frequency (seconds)', min: 0.5, max: 5, step: 0.1},
+                {name: 'growSpeed', type: 'range', label: 'Grow Speed', min: 0.2, max: 2, step: 0.1},
+                {name: 'tailSpeed', type: 'range', label: 'Tail Speed', min: 0.2, max: 1, step: 0.05, default: 1}
+            ]
+        };
+
+        function populateSettings(type) {
+            settingsContent.innerHTML = '';
+            const settings = componentSettings[type];
+
+            if (!settings) {
+                settingsPanel.style.display = 'none';
+                return;
+            }
+
+            const knvasElement = getKnvasElement();
+            if (!knvasElement) return;
+
+            // Add theme selector
+            const themePresets = themes[type]?.presets;
+            if (themePresets) {
+                const themeDiv = document.createElement('div');
+                themeDiv.className = 'setting-item';
+
+                const themeLabel = document.createElement('label');
+                themeLabel.htmlFor = 'theme-selector';
+                themeLabel.textContent = 'Theme';
+
+                const themeSelect = document.createElement('select');
+                themeSelect.id = 'theme-selector';
+
+                // Add theme options (no default "select" option)
+                Object.keys(themePresets).forEach(themeName => {
+                    const option = document.createElement('option');
+                    option.value = themeName;
+                    option.textContent = themeName;
+                    themeSelect.appendChild(option);
+                });
+
+                // Set "Knvas" as default selected theme
+                themeSelect.value = 'Knvas';
+
+                themeSelect.addEventListener('change', () => {
+                    const selectedTheme = themeSelect.value;
+                    if (selectedTheme && themePresets[selectedTheme]) {
+                        const themeConfig = themePresets[selectedTheme];
+                        // Apply all theme settings
+                        Object.keys(themeConfig).forEach(key => {
+                            updateOption(key, themeConfig[key]);
+                        });
+                        // Repopulate settings to show updated values
+                        populateSettings(type);
+                    }
+                });
+
+                themeDiv.appendChild(themeLabel);
+                themeDiv.appendChild(themeSelect);
+                settingsContent.appendChild(themeDiv);
+
+                // Add separator
+                const separator = document.createElement('div');
+                separator.style.borderTop = '1px solid #e0e0e0';
+                separator.style.margin = '10px 0';
+                settingsContent.appendChild(separator);
+            }
+
+            settings.forEach(setting => {
+                const settingDiv = document.createElement('div');
+                settingDiv.className = setting.type === 'checkbox' ? 'setting-item checkbox-item' : 'setting-item';
+
+                if (setting.type === 'checkbox') {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = setting.name;
+
+                    const optionEl = knvasElement.querySelector(`option[name="${setting.name}"]`);
+                    checkbox.checked = optionEl ? (optionEl.getAttribute('value') === 'true') : false;
+
+                    checkbox.addEventListener('change', () => {
+                        updateOption(setting.name, checkbox.checked ? 'true' : 'false');
+                    });
+
+                    const label = document.createElement('label');
+                    label.htmlFor = setting.name;
+                    label.textContent = setting.label;
+
+                    settingDiv.appendChild(checkbox);
+                    settingDiv.appendChild(label);
+                } else {
+                    const label = document.createElement('label');
+                    label.htmlFor = setting.name;
+
+                    const input = document.createElement('input');
+                    input.type = setting.type;
+                    input.id = setting.name;
+
+                    // Set range-specific attributes
+                    if (setting.type === 'range') {
+                        input.min = setting.min;
+                        input.max = setting.max;
+                        input.step = setting.step;
+                    }
+
+                    const optionEl = knvasElement.querySelector(`option[name="${setting.name}"]`);
+                    const rawValue = optionEl
+                        ? optionEl.getAttribute('value')
+                        : (setting.type === 'range' ? (setting.default ?? setting.min) : '');
+                    input.value = setting.name === 'tailSpeed'
+                        ? normalizeTailSpeedValue(rawValue)
+                        : rawValue;
+
+                    // Function to update label text with value for range inputs
+                    const updateLabel = () => {
+                        if (setting.type === 'range') {
+                            label.textContent = `${setting.label} (${input.value})`;
+                        } else {
+                            label.textContent = setting.label;
+                        }
+                    };
+
+                    // Set initial label text
+                    updateLabel();
+
+                    input.addEventListener('change', () => {
+                        updateOption(setting.name, input.value);
+                    });
+
+                    // For range inputs, also update on input event for live feedback
+                    if (setting.type === 'range') {
+                        input.addEventListener('input', () => {
+                            updateLabel();
+                            updateOption(setting.name, input.value);
+                        });
+                    }
+
+                    settingDiv.appendChild(label);
+                    settingDiv.appendChild(input);
+                }
+
+                settingsContent.appendChild(settingDiv);
+            });
+
+            settingsPanel.style.display = 'block';
+            updateSettingsPanelPosition();
+            updateCodeDisplay();
+            toolbox.style.display = 'flex';
+            updateToolboxPosition();
+        }
+
+        function updateOption(name, value) {
+            const knvasElement = getKnvasElement();
+            if (!knvasElement) return;
+
+            let optionEl = knvasElement.querySelector(`option[name="${name}"]`);
+
+            if (!optionEl) {
+                optionEl = document.createElement('option');
+                optionEl.setAttribute('name', name);
+                knvasElement.appendChild(optionEl);
+            }
+
+            optionEl.setAttribute('value', value);
+
+            // Destroy old instance and create new one with updated options
+            const instance = knvas.getInstance(knvasElement);
+            if (instance && instance.destroy) {
+                instance.destroy();
+            }
+
+            const wrapper = knvasElement.closest('.knvas-wrapper');
+            const type = knvasElement.getAttribute('type');
+            const options = knvas.parseOptions(knvasElement);
+            const ComponentClass = knvas.components[type];
+
+            if (ComponentClass && wrapper) {
+                const newInstance = new ComponentClass(wrapper, options);
+                newInstance.init();
+                knvas.instances.set(knvasElement, newInstance);
+            }
+
+            // Update code display
+            updateCodeDisplay();
+        }
+
+        function updateSettingsPanelPosition() {
+            if (settingsPanel.style.display === 'none') return;
+
+            const panelWidth = 180;
+            const gap = 10;
+
+            // Use bounds instead of getBoundingClientRect to avoid 3D transform issues
+            let left = bounds.right + gap;
+
+            // Ensure panel stays within viewport
+            const maxLeft = window.innerWidth - panelWidth - gap;
+            left = Math.min(left, maxLeft);
+
+            settingsPanel.style.left = left + 'px';
+            settingsPanel.style.top = bounds.top + 'px';
+            settingsPanel.style.height = (bounds.bottom - bounds.top) + 'px';
+        }
+
+        // Code display management
+        const codeDisplay = document.querySelector('.code-display');
+        const codeContent = document.querySelector('.code-content code');
+        let activeMobilePanel = 'settings';
+
+        function isMobileLayout() {
+            return window.innerWidth <= MOBILE_BREAKPOINT;
+        }
+
+        function getPanelAvailability() {
+            return {
+                settings: settingsPanel.style.display !== 'none',
+                code: codeDisplay.style.display !== 'none'
+            };
+        }
+
+        function syncMobilePanels() {
+            const {settings, code} = getPanelAvailability();
+
+            if (!isMobileLayout()) {
+                settingsPanel.classList.remove('mobile-active');
+                codeDisplay.classList.remove('mobile-active');
+                mobilePanelTabs.classList.remove('is-visible');
+
+                mobilePanelTabButtons.forEach(button => {
+                    button.classList.remove('is-active');
+                    button.disabled = false;
+                    button.setAttribute('aria-pressed', 'false');
+                });
+
+                return;
+            }
+
+            const hasVisiblePanel = settings || code;
+            mobilePanelTabs.classList.toggle('is-visible', hasVisiblePanel);
+
+            if (!hasVisiblePanel) {
+                settingsPanel.classList.remove('mobile-active');
+                codeDisplay.classList.remove('mobile-active');
+            } else if (activeMobilePanel === 'code' && code) {
+                settingsPanel.classList.remove('mobile-active');
+                codeDisplay.classList.add('mobile-active');
+            } else {
+                activeMobilePanel = 'settings';
+                settingsPanel.classList.add('mobile-active');
+                codeDisplay.classList.remove('mobile-active');
+            }
+
+            mobilePanelTabButtons.forEach(button => {
+                const panelName = button.dataset.panelTarget;
+                const available = panelName === 'settings' ? settings : code;
+                const isActive = hasVisiblePanel && available && panelName === activeMobilePanel;
+
+                button.classList.toggle('is-active', isActive);
+                button.disabled = !available;
+                button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+        }
+
+        function setActiveMobilePanel(panelName) {
+            const {settings, code} = getPanelAvailability();
+
+            if (panelName === 'code' && !code) {
+                panelName = settings ? 'settings' : panelName;
+            }
+
+            if (panelName === 'settings' && !settings) {
+                panelName = code ? 'code' : panelName;
+            }
+
+            activeMobilePanel = panelName;
+            syncMobilePanels();
+        }
+
+        function generateCode() {
+            const knvasElement = getKnvasElement();
+            if (!knvasElement) return '';
+
+            const type = knvasElement.getAttribute('type');
+            const options = Array.from(knvasElement.querySelectorAll('option'));
+
+            let code = '<script src="https://knvas.dev/components/knvas.js"><' + '/script>\n\n';
+            code += `<knvas type="${type}">`;
+
+            if (options.length > 0) {
+                code += '\n';
+                options.forEach(option => {
+                    const name = option.getAttribute('name');
+                    const value = option.getAttribute('value');
+                    code += `  <option name="${name}" value="${value}">\n`;
+                });
+            }
+
+            code += '</knvas>';
+            return code;
+        }
+
+        function updateCodeDisplay() {
+            const code = generateCode();
+            if (code) {
+                codeContent.textContent = code;
+                Prism.highlightElement(codeContent);
+                codeDisplay.style.display = 'block';
+                updateCodeDisplayPosition();
+            } else {
+                codeDisplay.style.display = 'none';
+            }
+
+            syncMobilePanels();
+        }
+
+        function updateCodeDisplayPosition() {
+            if (codeDisplay.style.display === 'none') return;
+
+            const gap = 10;
+
+            // Use bounds instead of getBoundingClientRect to avoid 3D transform issues
+            codeDisplay.style.left = bounds.left + 'px';
+            codeDisplay.style.top = (bounds.bottom + gap) + 'px';
+            codeDisplay.style.width = (bounds.right - bounds.left) + 'px';
+        }
+
+        // Update both panels when container moves or window resizes
+        const originalUpdateLayout = updateLayout;
+        updateLayout = function () {
+            originalUpdateLayout();
+            updateSettingsPanelPosition();
+            updateCodeDisplayPosition();
+        };
+
+        // Copy button functionality
+        const copyButton = document.querySelector('.copy-button');
+        const copyIcon = copyButton.querySelector('.material-symbols-outlined');
+        copyButton.addEventListener('click', () => {
+            const code = generateCode();
+            if (!code) return;
+
+            navigator.clipboard.writeText(code).then(() => {
+                copyButton.classList.add('success');
+                copyIcon.textContent = 'check';
+                setTimeout(() => {
+                    copyButton.classList.remove('success');
+                    copyIcon.textContent = 'content_copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        });
+
+        // Toolbox management
+        const toolbox = document.querySelector('.toolbox');
+        const flipButton = document.querySelector('#flip-button');
+        const threeDButton = document.querySelector('#three-d-button');
+        const fpsValue = document.querySelector('#fps-value');
+
+        function updateToolboxPosition() {
+            if (toolbox.style.display === 'none') return;
+
+            const gap = 10;
+
+            // Use bounds instead of getBoundingClientRect to avoid 3D transform issues
+            // Position from the right edge of the viewport for stability
+            toolbox.style.left = '';
+            toolbox.style.right = (window.innerWidth - bounds.right) + 'px';
+            toolbox.style.top = (bounds.top - toolbox.offsetHeight - gap) + 'px';
+        }
+
+        // Flip button functionality
+        flipButton.addEventListener('click', () => {
+            const knvasElement = getKnvasElement();
+            if (!knvasElement) return;
+
+            // Toggle between container and body
+            if (knvasElement.parentElement === container) {
+                document.body.appendChild(knvasElement);
+            } else {
+                container.appendChild(knvasElement);
+            }
+        });
+
+        // 3D button functionality
+        threeDButton.addEventListener('click', () => {
+            container.classList.toggle('is3D');
+            threeDButton.classList.toggle('active');
+        });
+
+        // Update FPS display
+        function updateFPSDisplay() {
+            const knvasElement = document.querySelector('knvas');
+            if (knvasElement) {
+                const instance = knvas.getInstance(knvasElement);
+                if (instance && instance.fps !== undefined) {
+                    fpsValue.textContent = instance.fps;
+                } else {
+                    fpsValue.textContent = '0';
+                }
+            } else {
+                fpsValue.textContent = '0';
+            }
+            requestAnimationFrame(updateFPSDisplay);
+        }
+
+        updateFPSDisplay();
+
+        // Update toolbox position when container moves
+        const originalUpdateLayoutToolbox = updateLayout;
+        updateLayout = function () {
+            originalUpdateLayoutToolbox();
+            updateSettingsPanelPosition();
+            updateCodeDisplayPosition();
+            updateToolboxPosition();
+        };
+
+        window.addEventListener('resize', () => {
+            updateSettingsPanelPosition();
+            updateCodeDisplayPosition();
+            updateToolboxPosition();
+        });
+
+        // Mobile functionality
+        const hamburgerMenu = document.querySelector('.hamburger-menu');
+        const sidebar = document.querySelector('.sidebar');
+        const mobileFpsValue = document.querySelector('#mobile-fps-value');
+
+        // Hamburger menu toggle
+        hamburgerMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 &&
+                sidebar.classList.contains('open') &&
+                !sidebar.contains(e.target) &&
+                !hamburgerMenu.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // Update mobile FPS
+        function updateMobileFPS() {
+            if (mobileFpsValue && window.innerWidth <= 768) {
+                mobileFpsValue.textContent = fpsValue.textContent;
+            }
+        }
+
+        setInterval(updateMobileFPS, 100);
+
+        mobilePanelTabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (isMobileLayout()) {
+                    setActiveMobilePanel(button.dataset.panelTarget);
+                }
+            });
+        });
+
+        // Open settings by default on mobile
+        function initMobileLayout() {
+            if (isMobileLayout()) {
+                if (settingsPanel.style.display === 'none' && codeDisplay.style.display === 'none') {
+                    settingsPanel.style.display = 'block';
+                }
+                setActiveMobilePanel(activeMobilePanel);
+            } else {
+                syncMobilePanels();
+            }
+        }
+
+        await loadCanvasType('stars');
+        initMobileLayout();
+        window.addEventListener('resize', initMobileLayout);
+    }
+};
