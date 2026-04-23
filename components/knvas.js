@@ -587,3 +587,10 @@ class KnvasComponent {
 
 const knvas = new KnvasManager();
 window.knvas = knvas;
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => knvas.init());
+} else {
+    knvas.init();
+}
